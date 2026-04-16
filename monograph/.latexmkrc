@@ -10,4 +10,4 @@ $emulate_aux = 1;
 $xelatex = 'xelatex -synctex=1 -interaction=nonstopmode -file-line-error %O %S';
 
 # Use biber for biblatex
-$biber = 'biber --output-directory=%O %S';
+$biber = 'biber %O %S';

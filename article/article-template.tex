@@ -9,8 +9,14 @@
 \usepackage{fontspec}
 \usepackage{microtype}
 
+% Libertine (serif) + Inconsolata (mono) + matching math
+\usepackage{libertine}
+\usepackage[varqu]{zi4}
+\usepackage[libertine]{newtxmath}
+
 % ─── Mathematics (loaded by amsart, but we add extras) ───────────────────────
 \usepackage{mathtools}
+\let\Bbbk\relax
 \usepackage{amssymb}
 
 % ─── Page Layout ─────────────────────────────────────────────────────────────
@@ -93,6 +99,9 @@
 \subjclass[2020]{Primary XXXXX; Secondary YYYYY}
 \keywords{keyword one, keyword two, keyword three}
 
+% ═══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
 \begin{abstract}
   This paper investigates the properties of widgets
   and establishes a characterization of compact widgets
@@ -100,9 +109,6 @@
   We prove that every compact widget is sequentially compact
   and discuss the converse under additional hypotheses.
 \end{abstract}
-
-% ═══════════════════════════════════════════════════════════════════════════════
-\begin{document}
 
 \maketitle
 
@@ -187,5 +193,6 @@ hypotheses; see \autocite{example2024}.
 
 %%% Local Variables:
 %%% mode: LaTeX
+%%% TeX-engine: xetex
 %%% TeX-master: t
 %%% End:

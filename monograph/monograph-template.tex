@@ -19,8 +19,10 @@
 
 % ─── Mathematics ─────────────────────────────────────────────────────────────
 \usepackage{amsmath}
+\let\openbox\relax
 \usepackage{amsthm}
 \usepackage{mathtools}
+\let\Bbbk\relax
 \usepackage{amssymb}
 
 % ─── Page Layout ─────────────────────────────────────────────────────────────
@@ -121,7 +123,7 @@
   \vspace{1cm}
   {\Large\itshape Subtitle or Series Information\par}
   \vspace{3cm}
-  {\large Author One \and Author Two\par}
+  {\large Author One \quad Author Two\par}
   \vfill
   {\large \today\par}
 \end{titlingpage}
@@ -148,5 +150,6 @@
 
 %%% Local Variables:
 %%% mode: LaTeX
+%%% TeX-engine: xetex
 %%% TeX-master: t
 %%% End:

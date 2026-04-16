@@ -1,7 +1,9 @@
 {
     "editor.fontSize": 14,
     "editor.wordWrap": "on",
-    "editor.rulers": [90],
+    "editor.rulers": [
+        90
+    ],
     "files.eol": "\n",
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
@@ -20,7 +22,9 @@
     "latex-workshop.latex.recipes": [
         {
             "name": "latexmk (xelatex)",
-            "tools": ["latexmk-xelatex"]
+            "tools": [
+                "latexmk-xelatex"
+            ]
         }
     ],
     "latex-workshop.latex.tools": [
@@ -44,10 +48,13 @@
     "latex-workshop.latex.autoClean.run": "onFailed",
     "latex-workshop.latexindent.path": "latexindent",
     "latex-workshop.latexindent.args": [
-        "-c", "%DIR%/",
+        "-c",
+        "%DIR%/",
         "%TMPFILE%",
-        "-l", "%WORKSPACE_FOLDER%/latexindent.yaml",
+        "-l",
+        "%WORKSPACE_FOLDER%/latexindent.yaml",
         "-y=defaultIndent: '%INDENT%'"
     ],
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "makefile.configureOnOpen": false
 }
