@@ -1,0 +1,49 @@
+# latexindent.yaml — latexindent.pl configuration
+# Documentation: https://latexindentpl.readthedocs.io/
+#
+# Usage:
+#   latexindent -w -s -l latexindent.yaml file.tex
+#   make indent          # via Makefile target
+#   make format          # full format pass (wrap + indent)
+
+# ── Indentation ───────────────────────────────────────────────────────────────
+defaultIndent: "  "              # two spaces per nesting level
+
+# ── Blank lines ───────────────────────────────────────────────────────────────
+preserveBlankLines: 1
+condenseMultipleBlankLinesInto: 1
+
+# ── Suppress extra indentation in document body and math environments ─────────
+noAdditionalIndent:
+  document: 1
+  equation: 1
+  equation*: 1
+  align: 1
+  align*: 1
+  gather: 1
+  gather*: 1
+  multline: 1
+  multline*: 1
+  eqnarray: 1
+  eqnarray*: 1
+  split: 1
+  array: 1
+  aligned: 1
+  alignedat: 1
+  gathered: 1
+  cases: 1
+  subequations: 1
+
+# ── Verbatim environments (content is never touched) ─────────────────────────
+verbatimEnvironments:
+  verbatim: 1
+  Verbatim: 1
+  lstlisting: 1
+  minted: 1
+  filecontents: 1
+  comment: 1
+
+# ── Trailing whitespace ───────────────────────────────────────────────────────
+removeTrailingWhitespace:
+  beforeProcessing: 1
+  afterProcessing: 1

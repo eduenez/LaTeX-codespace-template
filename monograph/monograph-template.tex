@@ -1,0 +1,152 @@
+% monograph-template.tex — Main file for a book/monograph project (memoir class)
+%
+% Compile: latexmk (uses .latexmkrc at the project root)
+% Engine:  XeLaTeX
+%
+% To compile only specific chapters, uncomment and edit the \includeonly line.
+% Do NOT remove or reorder the \include lines below.
+
+\documentclass[letterpaper,12pt,oneside,openany]{memoir}
+
+% ─── Encoding and Fonts ─────────────────────────────────────────────────────
+\usepackage{fontspec}
+\usepackage{microtype}
+
+% Libertine (serif) + Inconsolata (mono) + matching math
+\usepackage{libertine}
+\usepackage[varqu]{zi4}
+\usepackage[libertine]{newtxmath}
+
+% ─── Mathematics ─────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{amssymb}
+
+% ─── Page Layout ─────────────────────────────────────────────────────────────
+\setlrmarginsandblock{3.5cm}{2.5cm}{*}
+\setulmarginsandblock{3cm}{3cm}{*}
+\checkandfixthelayout
+
+% Chapter and heading style
+\chapterstyle{madsen}
+\nouppercaseheads
+\pagestyle{ruled}
+
+% ─── Theorem-like Environments ───────────────────────────────────────────────
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{notation}[theorem]{Notation}
+
+% ─── Graphics, Diagrams and Colors ──────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+
+% ─── Cross-referencing ───────────────────────────────────────────────────────
+\usepackage[
+  hidelinks,
+  colorlinks=true,
+  linkcolor=blue!40!black,
+  citecolor=green!40!black,
+  urlcolor=magenta!40!black
+]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+
+% ─── Bibliography ────────────────────────────────────────────────────────────
+\usepackage[
+  backend=biber,
+  style=alphabetic,
+  sorting=nyt,
+  maxbibnames=10
+]{biblatex}
+\addbibresource{references.bib}
+
+% ─── Collaboration Tools ────────────────────────────────────────────────────
+\usepackage[colorinlistoftodos,textsize=small]{todonotes}
+% Usage: \todo{Fix this argument} or \todo[inline]{Rewrite this section}
+
+% ─── Custom Macros ───────────────────────────────────────────────────────────
+
+% Number sets (blackboard bold)
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\CC}{\mathbb{C}}
+
+% Delimiters
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
+
+% Operators
+\DeclareMathOperator{\id}{id}
+
+% ─── Compilation Control ────────────────────────────────────────────────────
+% Uncomment the next line and list only the chapters you want to compile:
+% \includeonly{ch-introduction,ch-background,ch-main-results,ch-conclusion}
+
+% ─── Document Metadata ──────────────────────────────────────────────────────
+\title{%
+  \Huge\bfseries Title of the Monograph\\[0.5cm]
+  \Large\itshape Subtitle or Series Information%
+}
+\author{Author One \and Author Two}
+\date{\today}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+\frontmatter
+
+% Title page
+\begin{titlingpage}
+  \centering
+  \vspace*{4cm}
+  {\Huge\bfseries Title of the Monograph\par}
+  \vspace{1cm}
+  {\Large\itshape Subtitle or Series Information\par}
+  \vspace{3cm}
+  {\large Author One \and Author Two\par}
+  \vfill
+  {\large \today\par}
+\end{titlingpage}
+
+\tableofcontents*
+\clearpage
+
+\mainmatter
+
+% ─── Content Chapters ────────────────────────────────────────────────────────
+% Each chapter lives in its own file in this directory.
+% Use \include (not \input) so that \includeonly works.
+\include{ch-introduction}
+\include{ch-background}
+\include{ch-main-results}
+\include{ch-conclusion}
+
+\backmatter
+
+% ─── Bibliography ────────────────────────────────────────────────────────────
+\printbibliography[heading=bibintoc]
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: t
+%%% End:
