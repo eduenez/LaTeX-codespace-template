@@ -16,7 +16,7 @@
 #   make clean-all           – remove all build directories
 #   make help                – show this help
 
-COLS    := 90
+COLS    := 100
 
 .PHONY: all help monograph article format wrap indent check lint clean clean-all install-hooks
 

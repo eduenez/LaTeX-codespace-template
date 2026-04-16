@@ -2,7 +2,7 @@
 """
 texwrap.py — Semantic line wrapper for LaTeX source files.
 
-Wraps prose lines longer than --cols (default 90) at the best available
+Wraps prose lines longer than --cols (default 100) at the best available
 semantic boundary, searching right-to-left from column --cols:
 
   priority 1 – sentence end   ". "  "? "  "! "
@@ -30,29 +30,56 @@ from pathlib import Path
 # Configuration constants
 # ---------------------------------------------------------------------------
 
-DEFAULT_COLS: int = 90
-MIN_BREAK_COL: int = 40   # never break before this column
+DEFAULT_COLS: int = 100
+MIN_BREAK_COL: int = 50  # never break before this column
 
 # Bodies of these environments are never touched (treated as verbatim)
-VERBATIM_ENVS: frozenset = frozenset({
-    "verbatim", "Verbatim", "lstlisting", "minted",
-    "filecontents", "comment", "BVerbatim", "SaveVerbatim",
-})
+VERBATIM_ENVS: frozenset = frozenset(
+    {
+        "verbatim",
+        "Verbatim",
+        "lstlisting",
+        "minted",
+        "filecontents",
+        "comment",
+        "BVerbatim",
+        "SaveVerbatim",
+    }
+)
 
 # Display-math environments: content is not prose, skip line-break insertion
-MATH_ENVS: frozenset = frozenset({
-    "equation",  "equation*",
-    "align",     "align*",
-    "gather",    "gather*",
-    "multline",  "multline*",
-    "eqnarray",  "eqnarray*",
-    "split",     "aligned",    "alignedat",  "gathered",
-    "array",     "matrix",
-    "pmatrix",   "bmatrix",    "vmatrix",    "Vmatrix",    "Bmatrix",
-    "cases",     "subequations",
-    "tikzpicture",
-    "tabular",   "tabular*",   "tabularx",   "longtable",
-})
+MATH_ENVS: frozenset = frozenset(
+    {
+        "equation",
+        "equation*",
+        "align",
+        "align*",
+        "gather",
+        "gather*",
+        "multline",
+        "multline*",
+        "eqnarray",
+        "eqnarray*",
+        "split",
+        "aligned",
+        "alignedat",
+        "gathered",
+        "array",
+        "matrix",
+        "pmatrix",
+        "bmatrix",
+        "vmatrix",
+        "Vmatrix",
+        "Bmatrix",
+        "cases",
+        "subequations",
+        "tikzpicture",
+        "tabular",
+        "tabular*",
+        "tabularx",
+        "longtable",
+    }
+)
 
 PROTECTED_ENVS: frozenset = VERBATIM_ENVS | MATH_ENVS
 
@@ -82,7 +109,7 @@ def _is_sentence_end(text: str, i: int) -> bool:
         start = i - 1
         while start >= 0 and (text[start].isalnum() or text[start] == "."):
             start -= 1
-        word = text[start + 1: i + 1]
+        word = text[start + 1 : i + 1]
         if _ABBREV_RE.match(word):
             return False
         if word.replace(".", "").isdigit():
@@ -93,6 +120,7 @@ def _is_sentence_end(text: str, i: int) -> bool:
 # ---------------------------------------------------------------------------
 # Break-point search
 # ---------------------------------------------------------------------------
+
 
 def _find_break(line: str, lo: int, hi: int) -> int | None:
     """
@@ -130,6 +158,7 @@ def _find_break(line: str, lo: int, hi: int) -> int | None:
 # Single-line wrapper
 # ---------------------------------------------------------------------------
 
+
 def _wrap_line(line: str, max_cols: int) -> list[str]:
     """Wrap one long prose line into multiple shorter lines."""
     if len(line) <= max_cols:
@@ -155,15 +184,16 @@ def _wrap_line(line: str, max_cols: int) -> list[str]:
 # ---------------------------------------------------------------------------
 
 _BEGIN_RE = re.compile(r"\\begin\{([^}]+)\}")
-_END_RE   = re.compile(r"\\end\{([^}]+)\}")
-_DISPLAY_OPEN  = re.compile(r"^\s*\\\[")
+_END_RE = re.compile(r"\\end\{([^}]+)\}")
+_DISPLAY_OPEN = re.compile(r"^\s*\\\[")
 _DISPLAY_CLOSE = re.compile(r"^\s*\\\]")
-_COMMENT_LINE  = re.compile(r"^\s*%")
+_COMMENT_LINE = re.compile(r"^\s*%")
 
 
 # ---------------------------------------------------------------------------
 # File processor
 # ---------------------------------------------------------------------------
+
 
 def process(text: str, max_cols: int) -> str:
     """Return reformatted content for one .tex file."""
@@ -197,9 +227,7 @@ def process(text: str, max_cols: int) -> str:
                     del env_stack[i]
                     break
 
-        if (in_protected
-                or _COMMENT_LINE.match(line)
-                or len(line) <= max_cols):
+        if in_protected or _COMMENT_LINE.match(line) or len(line) <= max_cols:
             out.append(line)
         else:
             out.extend(_wrap_line(line, max_cols))
@@ -211,6 +239,7 @@ def process(text: str, max_cols: int) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__,
@@ -218,11 +247,15 @@ def main() -> int:
     )
     ap.add_argument("files", nargs="+", metavar="FILE")
     ap.add_argument(
-        "--check", action="store_true",
+        "--check",
+        action="store_true",
         help="Dry run: report files that need changes, exit 1 if any.",
     )
     ap.add_argument(
-        "--cols", type=int, default=DEFAULT_COLS, metavar="N",
+        "--cols",
+        type=int,
+        default=DEFAULT_COLS,
+        metavar="N",
         help=f"Target column width (default: {DEFAULT_COLS}).",
     )
     args = ap.parse_args()

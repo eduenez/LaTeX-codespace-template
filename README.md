@@ -92,9 +92,9 @@ Widget theory was initiated by Doe~\cite{Doe2020}. The main theorem characterize
 **Why?** Git tracks changes line by line.
 If you edit one word in a paragraph-long line, Git marks the entire paragraph as changed, making code review and conflict resolution extremely difficult.
 
-### Line Width: 90 Columns
+### Line Width: 100 Columns
 
-Prose lines must not exceed **90 columns**.
+Prose lines must not exceed **100 columns**.
 The `texwrap.py` script automatically wraps at semantic boundaries (sentence end, semicolon, colon, comma).
 
 ```bash
