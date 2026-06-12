@@ -21,22 +21,21 @@
     "latex-workshop.latex.outDir": "%DIR%/build",
     "latex-workshop.latex.recipes": [
         {
-            "name": "latexmk (xelatex)",
+            "name": "latexmk",
             "tools": [
-                "latexmk-xelatex"
+                "latexmk"
             ]
         }
     ],
     "latex-workshop.latex.tools": [
         {
-            "name": "latexmk-xelatex",
+            "name": "latexmk",
             "command": "latexmk",
             "args": [
-                "-xelatex",
                 "-synctex=1",
                 "-interaction=nonstopmode",
                 "-file-line-error",
-                "-outdir=%OUTDIR%",
+                "-cd",
                 "%DOC%"
             ]
         }
