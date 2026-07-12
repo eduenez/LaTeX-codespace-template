@@ -1,0 +1,6 @@
+[submodule "bib"]
+	path = bib
+	url = https://github.com/eduenez/math-bibliography.git
+[submodule "sty"]
+	path = sty
+	url = https://github.com/eduenez/LaTeX-shared-files.git

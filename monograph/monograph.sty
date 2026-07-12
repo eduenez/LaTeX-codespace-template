@@ -1,0 +1,45 @@
+%% monograph.sty — Monograph-template-specific preamble
+%%
+%% Layers on top of di-base (shared theorem environments, fonts, math
+%% packages). Requires di-base to be loaded first.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{monograph}[2026/07/12 monograph template preamble]
+
+% ── Re-parent theorem/equation counters to \chapter ──────────────────────────
+% di-base defines the standard theorem taxonomy numbered [section] (suitable
+% for amsart-style papers). This monograph is chapter-structured, so
+% re-parent both counters to \chapter: "Theorem 2.3" resets at each chapter,
+% rather than at each section.
+\counterwithin{theorem}{chapter}
+\counterwithin{equation}{chapter}
+
+% ── Additional theorem environments not in di-base ───────────────────────────
+\theoremstyle{plain}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{exercise}[theorem]{Exercise}
+
+% ── Additional packages ───────────────────────────────────────────────────────
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage[colorinlistoftodos,textsize=small]{todonotes}
+
+% ── Custom Macros ────────────────────────────────────────────────────────────
+
+% Number sets
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\CC}{\mathbb{C}}
+
+% Delimiters
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
+
+% Operators
+\DeclareMathOperator{\id}{id}

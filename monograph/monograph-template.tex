@@ -1,31 +1,20 @@
 % monograph-template.tex — Main file for a book/monograph project (memoir class)
 %
-% Compile: latexmk (uses .latexmkrc at the project root)
-% Engine:  XeLaTeX
+% Compile: latexmk (uses latexmkrc in this directory)
+% Engine:  pdflatex
 %
 % To compile only specific chapters, uncomment and edit the \includeonly line.
 % Do NOT remove or reorder the \include lines below.
 
 \documentclass[letterpaper,12pt,oneside,openany]{memoir}
 
-% ─── Encoding and Fonts ─────────────────────────────────────────────────────
-\usepackage{fontspec}
-\usepackage{microtype}
-
-% Libertine (serif) + Inconsolata (mono) + matching math
-\usepackage{libertine}
-\usepackage[varqu]{zi4}
-\usepackage[libertine]{newtxmath}
-
-% ─── Mathematics ─────────────────────────────────────────────────────────────
-\usepackage{amsmath}
-\let\openbox\relax
-\usepackage{amsthm}
-\usepackage{mathtools}
-\let\Bbbk\relax
-\usepackage{amssymb}
+% ─── Shared preamble (submodule sty/, see sty/README.md) ────────────────────
+\usepackage{di-base}
+\usepackage{monograph}
 
 % ─── Page Layout ─────────────────────────────────────────────────────────────
+% memoir manages its own page geometry; avoid loading the geometry package
+% alongside it, since the two layout systems can conflict.
 \setlrmarginsandblock{3.5cm}{2.5cm}{*}
 \setulmarginsandblock{3cm}{3cm}{*}
 \checkandfixthelayout
@@ -35,68 +24,23 @@
 \nouppercaseheads
 \pagestyle{ruled}
 
-% ─── Theorem-like Environments ───────────────────────────────────────────────
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[chapter]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{conjecture}[theorem]{Conjecture}
-
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-\newtheorem{exercise}[theorem]{Exercise}
-
-\theoremstyle{remark}
-\newtheorem{remark}[theorem]{Remark}
-\newtheorem{notation}[theorem]{Notation}
-
-% ─── Graphics, Diagrams and Colors ──────────────────────────────────────────
-\usepackage{graphicx}
-\usepackage{xcolor}
-\usepackage{tikz}
-\usepackage{tikz-cd}
-
-% ─── Cross-referencing ───────────────────────────────────────────────────────
-\usepackage[
-  hidelinks,
-  colorlinks=true,
-  linkcolor=blue!40!black,
-  citecolor=green!40!black,
-  urlcolor=magenta!40!black
-]{hyperref}
-\usepackage[capitalise,noabbrev]{cleveref}
-
 % ─── Bibliography ────────────────────────────────────────────────────────────
+\usepackage{csquotes}
 \usepackage[
   backend=biber,
   style=alphabetic,
   sorting=nyt,
   maxbibnames=10
 ]{biblatex}
+
+% Local, monograph-specific bibliography (active by default).
 \addbibresource{references.bib}
 
-% ─── Collaboration Tools ────────────────────────────────────────────────────
-\usepackage[colorinlistoftodos,textsize=small]{todonotes}
-% Usage: \todo{Fix this argument} or \todo[inline]{Rewrite this section}
-
-% ─── Custom Macros ───────────────────────────────────────────────────────────
-
-% Number sets (blackboard bold)
-\newcommand{\NN}{\mathbb{N}}
-\newcommand{\ZZ}{\mathbb{Z}}
-\newcommand{\QQ}{\mathbb{Q}}
-\newcommand{\RR}{\mathbb{R}}
-\newcommand{\CC}{\mathbb{C}}
-
-% Delimiters
-\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
-\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
-\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
-
-% Operators
-\DeclareMathOperator{\id}{id}
+% Uncomment to also draw on the shared bibliography submodule (bib/, see
+% bib/README.md for citation-key conventions and update instructions). Some
+% coauthors may prefer to keep this monograph's references self-contained, or
+% may be unfamiliar with git submodules — hence commented out by default.
+% \addbibresource{bib/references.bib}
 
 % ─── Compilation Control ────────────────────────────────────────────────────
 % Uncomment the next line and list only the chapters you want to compile:
@@ -110,7 +54,7 @@
 \author{Author One \and Author Two}
 \date{\today}
 
-% ═══════════════════════════════════════════════════════════════════════════════
+% ═══════════════════════════════════════════════════════════════════════════
 \begin{document}
 
 \frontmatter
@@ -150,6 +94,6 @@
 
 %%% Local Variables:
 %%% mode: LaTeX
-%%% TeX-engine: xetex
+%%% TeX-engine: default
 %%% TeX-master: t
 %%% End:

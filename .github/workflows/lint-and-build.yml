@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,24 +29,16 @@ jobs:
             texlive-latex-extra
 
       - name: Check line width (monograph)
-        run: python3 scripts/texwrap.py --check --cols 90 monograph/*.tex
+        run: python3 scripts/texwrap.py --check --cols 100 monograph/*.tex
 
       - name: Check line width (article)
-        run: python3 scripts/texwrap.py --check --cols 90 article/*.tex
+        run: python3 scripts/texwrap.py --check --cols 100 article/*.tex
 
       - name: Run chktex (monograph)
-        uses: j2kun/chktex-action@main
-        with:
-          args: "-q -l .chktexrc monograph/*.tex"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: chktex -q -l .chktexrc monograph/*.tex
 
       - name: Run chktex (article)
-        uses: j2kun/chktex-action@main
-        with:
-          args: "-q -l .chktexrc article/*.tex"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: chktex -q -l .chktexrc article/*.tex
 
       - name: Check for banned patterns
         run: |
@@ -76,6 +70,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install TeX Live
         run: |

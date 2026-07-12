@@ -1,70 +1,45 @@
 % article-template.tex — Template for a research paper (amsart class)
 %
-% Compile: latexmk (uses .latexmkrc in this directory)
-% Engine:  XeLaTeX
+% Compile: latexmk (uses latexmkrc in this directory)
+% Engine:  pdflatex
 
 \documentclass[12pt]{amsart}
 
-% ─── Encoding and Fonts ─────────────────────────────────────────────────────
-\usepackage{fontspec}
-\usepackage{microtype}
-
-% Libertine (serif) + Inconsolata (mono) + matching math
-\usepackage{libertine}
-\usepackage[varqu]{zi4}
-\usepackage[libertine]{newtxmath}
-
-% ─── Mathematics (loaded by amsart, but we add extras) ───────────────────────
-\usepackage{mathtools}
-\let\Bbbk\relax
-\usepackage{amssymb}
+% ─── Shared preamble (submodule sty/, see sty/README.md) ────────────────────
+\usepackage{di-base}
 
 % ─── Page Layout ─────────────────────────────────────────────────────────────
-\usepackage{geometry}
-\geometry{margin=1in}
+\usepackage[margin=1in]{geometry}
 
-% ─── Theorem-like Environments ───────────────────────────────────────────────
-% amsart provides \newtheorem; we define our environments here.
+% ─── Additional theorem environment not in di-base ──────────────────────────
 \theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{conjecture}[theorem]{Conjecture}
-
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-
-\theoremstyle{remark}
-\newtheorem{remark}[theorem]{Remark}
 
 % ─── Graphics, Diagrams, and Colors ─────────────────────────────────────────
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usepackage{tikz-cd}
 
-% ─── Cross-referencing ───────────────────────────────────────────────────────
-\usepackage[
-  colorlinks=true,
-  linkcolor=blue!40!black,
-  citecolor=green!40!black,
-  urlcolor=magenta!40!black
-]{hyperref}
-\usepackage[capitalise,noabbrev]{cleveref}
+% ─── Collaboration Tools ────────────────────────────────────────────────────
+\usepackage[colorinlistoftodos,textsize=small]{todonotes}
 
 % ─── Bibliography ────────────────────────────────────────────────────────────
+\usepackage{csquotes}
 \usepackage[
   backend=biber,
   style=alphabetic,
   sorting=nyt,
   maxbibnames=10
 ]{biblatex}
+
+% Local, paper-specific bibliography (active by default).
 \addbibresource{references.bib}
 
-% ─── Collaboration Tools ────────────────────────────────────────────────────
-\usepackage[colorinlistoftodos,textsize=small]{todonotes}
+% Uncomment to also draw on the shared bibliography submodule (bib/, see
+% bib/README.md for citation-key conventions and update instructions). Some
+% coauthors may prefer to keep this paper's references self-contained, or
+% may be unfamiliar with git submodules — hence commented out by default.
+% \addbibresource{bib/references.bib}
 
 % ─── Custom Macros ───────────────────────────────────────────────────────────
 
@@ -99,7 +74,7 @@
 \subjclass[2020]{Primary XXXXX; Secondary YYYYY}
 \keywords{keyword one, keyword two, keyword three}
 
-% ═══════════════════════════════════════════════════════════════════════════════
+% ═══════════════════════════════════════════════════════════════════════════
 \begin{document}
 
 \begin{abstract}
@@ -193,6 +168,6 @@ hypotheses; see \autocite{example2024}.
 
 %%% Local Variables:
 %%% mode: LaTeX
-%%% TeX-engine: xetex
+%%% TeX-engine: default
 %%% TeX-master: t
 %%% End:

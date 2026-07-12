@@ -3,15 +3,73 @@
 A batteries-included template repository for collaborative LaTeX writing, designed to be used as a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-template-repository).
 It provides two project templates — a **monograph** (memoir class) and a **research article** (amsart class) — along with a fully configured Codespace for cloud-based editing with VS Code.
 
+Both projects are built with **pdflatex** and share a common preamble system: `di-base` (theorem
+environments, math fonts, hyperref/cleveref setup) and an optional shared bibliography, both
+included as git submodules — see [Shared Preamble](#shared-preamble) and
+[Bibliography](#bibliography) below.
+
 ## Quick Start
 
+This repository uses two git submodules (`sty/` and `bib/`), so clone **with**
+`--recurse-submodules`:
+
+```bash
+git clone --recurse-submodules <your-new-repo-url>
+cd <your-new-repo>
+git submodule update --init --recursive   # if you forgot --recurse-submodules
+```
+
 1. Click **"Use this template"** on GitHub to create a new repository.
-2. Open the new repository in a **GitHub Codespace** (or clone locally).
+2. Open the new repository in a **GitHub Codespace** (or clone locally, with submodules).
 3. Choose a project template:
    - `monograph/` — for a book, thesis, or lecture notes
    - `article/` — for a journal paper or preprint
 4. Start writing!
    Build with `make monograph` or `make article`.
+
+## Shared Preamble
+
+Both templates load [`di-base`](https://github.com/eduenez/LaTeX-shared-files), mounted at
+[`sty/`](sty/) as a git submodule, via `\usepackage{di-base}`.
+It provides the standard theorem-environment taxonomy (`theorem`, `proposition`, `lemma`,
+`corollary`, `definition`, `example`, `remark`, `notation`, …, all sharing one counter), engine-
+agnostic math fonts, and the core math/cross-referencing package set (`mathtools`, `amsthm`,
+`tikz-cd`, `hyperref`, `cleveref`).
+Project-specific additions layer on top:
+
+- `monograph/monograph.sty` re-parents theorem and equation numbering from `[section]` to
+  `[chapter]` (since the monograph is chapter-structured) and adds a couple of extra environments
+  and macros.
+- `article/article-template.tex` adds its extra environment/macros directly inline, since it's a
+  single-file paper.
+
+See [`sty/README.md`](sty/README.md) for the full package documentation.
+
+## Bibliography
+
+Each project has its own local `references.bib`, active by default.
+The shared [`math-bibliography`](https://github.com/eduenez/math-bibliography) database is also
+available as a submodule at [`bib/`](bib/), but is **not** wired in by default — some coauthors may
+prefer to keep a project's references self-contained, or may be unfamiliar with git submodules.
+To opt in, uncomment the `\addbibresource{bib/references.bib}` line near the top of
+`monograph-template.tex` / `article-template.tex`.
+
+### Working with the submodules
+
+```bash
+# After a fresh clone (or after pulling a commit that adds/moves a submodule):
+git submodule update --init --recursive
+
+# Pull the latest bibliography entries from upstream (only if bib/ is in use):
+git submodule update --remote bib
+git add bib && git commit -m "Bump bibliography submodule"
+```
+
+`git pull` updates the *pointer* to a submodule's commit but does not change the files inside it —
+run `git submodule update --init --recursive` after pulling to sync them.
+
+If drawing on the shared database, new entries follow the `Author-Author:YYYY` citation-key
+convention — see [`bib/README.md`](bib/README.md).
 
 ## Repository Structure
 
@@ -27,20 +85,23 @@ It provides two project templates — a **monograph** (memoir class) and a **res
 │   └── workflows/
 │       └── lint-and-build.yml   # CI: lint, check, build PDFs
 ├── .gitignore
-├── .latexmkrc                # Root latexmk config (XeLaTeX, output → build/)
+├── .gitmodules                # bib/ and sty/ submodule declarations
+├── latexmkrc                  # Root latexmk fallback config (see comment in the file)
 ├── .vscode/
 │   └── settings.json         # VS Code settings (fallback for non-Codespace use)
 ├── article/                  # Research paper template (amsart)
-│   ├── .latexmkrc
+│   ├── latexmkrc
 │   ├── article-template.tex
 │   ├── references.bib
 │   └── build/                # (gitignored) build artifacts
-├── hooks/                    # (empty; hooks installed to .git/hooks/ by script)
+├── bib/                       # Shared bibliography (git submodule → math-bibliography)
+├── sty/                       # Shared preamble (git submodule → LaTeX-shared-files)
 ├── latexindent.yaml          # latexindent configuration
 ├── Makefile                  # Build, format, lint, clean targets
 ├── monograph/                # Monograph template (memoir)
-│   ├── .latexmkrc
+│   ├── latexmkrc
 │   ├── monograph-template.tex
+│   ├── monograph.sty          # Monograph-specific preamble (layered on di-base)
 │   ├── ch-introduction.tex
 │   ├── ch-background.tex
 │   ├── ch-main-results.tex
@@ -55,7 +116,7 @@ It provides two project templates — a **monograph** (memoir class) and a **res
 
 ## Building
 
-The project uses **XeLaTeX** via `latexmk`.
+The projects use **pdflatex** via `latexmk`.
 All build artifacts (`.aux`, `.log`, `.pdf`, …) are written to a `build/` subdirectory, keeping the source tree clean.
 
 ```bash
@@ -98,7 +159,7 @@ Prose lines must not exceed **100 columns**.
 The `texwrap.py` script automatically wraps at semantic boundaries (sentence end, semicolon, colon, comma).
 
 ```bash
-make check PROJECT=monograph   # Dry-run: report lines > 90 columns
+make check PROJECT=monograph   # Dry-run: report lines > 100 columns
 make wrap  PROJECT=monograph   # Auto-wrap lines
 ```
 
@@ -181,7 +242,7 @@ The templates include the `todonotes` package:
 
 ### The Mantra: Pull → Commit → Push
 
-1. **Pull first**: `git pull` before you start writing.
+1. **Pull first**: `git pull` before you start writing (then `git submodule update --init --recursive`).
 2. **Commit often**: Make small, focused commits with descriptive messages.
 3. **Push last**: `git push` when done so others can see your work.
 
@@ -205,7 +266,7 @@ The `.gitignore` excludes all build artifacts.
 A git pre-commit hook is installed automatically (by the Codespace `postCreateCommand` or by running `make install-hooks`).
 It checks staged `.tex` files for:
 
-1. Lines exceeding 90 columns
+1. Lines exceeding 100 columns
 2. Trailing whitespace
 3. `$$` display math
 4. `\eqnarray` usage
@@ -216,21 +277,26 @@ If any check fails, the commit is aborted with an explanation of what to fix.
 
 The `.devcontainer/` directory configures a GitHub Codespace with:
 
-- **Full TeX Live** distribution (XeLaTeX, BibTeX, Biber, latexmk, chktex, latexindent, texcount)
+- **Full TeX Live** distribution (pdfLaTeX, BibTeX, Biber, latexmk, chktex, latexindent, texcount)
 - **VS Code extensions**: LaTeX Workshop, GitLens, Copilot, trailing-spaces, rewrap, spell checker
 - **Auto-build on save** via LaTeX Workshop
 - **PDF preview** in a VS Code tab
 - **Linting** via chktex (runs on every keystroke)
+
+> **Note:** the Codespace clones submodules automatically; for a manual clone run
+> `git submodule update --init --recursive` once.
 
 ## CI Pipeline
 
 Every push and pull request to `main` triggers a GitHub Actions workflow that:
 
 1. **Lints** all `.tex` files with chktex
-2. **Checks** line width (90 columns) with texwrap.py
+2. **Checks** line width (100 columns) with texwrap.py
 3. **Checks** for banned patterns (`$$`, `\eqnarray`)
 4. **Builds** both PDFs (monograph and article)
 5. **Uploads** compiled PDFs as workflow artifacts
+
+Both jobs check out the `sty/` and `bib/` submodules via `with: submodules: recursive`.
 
 ## Adding Chapters (Monograph)
 

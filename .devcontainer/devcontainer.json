@@ -28,77 +28,17 @@
             ],
             "settings": {
                 // ── General editor ──────────────────────────────────────
+                // LaTeX Workshop / linting / spell-check / word-count settings
+                // live in .vscode/settings.json (the single source of truth,
+                // so Codespace and local VS Code never drift out of sync).
                 "files.eol": "\n",
                 "files.trimTrailingWhitespace": true,
                 "files.insertFinalNewline": true,
                 "editor.wordWrap": "on",
-                "editor.rulers": [90],
+                "editor.rulers": [100],
                 "editor.fontSize": 14,
                 "files.autoSave": "afterDelay",
                 "files.autoSaveDelay": 120000,
-                "files.associations": {
-                    "*.tex": "latex",
-                    "*.bib": "bibtex",
-                    "*.cls": "latex",
-                    "*.sty": "latex"
-                },
-
-                // ── LaTeX Workshop ──────────────────────────────────────
-                "[latex]": {
-                    "editor.defaultFormatter": "James-Yu.latex-workshop"
-                },
-                "latex-workshop.latex.autoBuild.run": "onSave",
-                "latex-workshop.latex.outDir": "%DIR%/build",
-                "latex-workshop.latex.recipes": [
-                    {
-                        "name": "latexmk (xelatex)",
-                        "tools": ["latexmk-xelatex"]
-                    },
-                    {
-                        "name": "latexmk (pdflatex)",
-                        "tools": ["latexmk-pdflatex"]
-                    }
-                ],
-                "latex-workshop.latex.tools": [
-                    {
-                        "name": "latexmk-xelatex",
-                        "command": "latexmk",
-                        "args": [
-                            "-xelatex",
-                            "-synctex=1",
-                            "-interaction=nonstopmode",
-                            "-file-line-error",
-                            "-outdir=%OUTDIR%",
-                            "%DOC%"
-                        ],
-                        "env": {}
-                    },
-                    {
-                        "name": "latexmk-pdflatex",
-                        "command": "latexmk",
-                        "args": [
-                            "-pdf",
-                            "-synctex=1",
-                            "-interaction=nonstopmode",
-                            "-file-line-error",
-                            "-outdir=%OUTDIR%",
-                            "%DOC%"
-                        ],
-                        "env": {}
-                    }
-                ],
-                "latex-workshop.latex.clean.subfolder.enabled": true,
-                "latex-workshop.latex.autoClean.run": "onFailed",
-                "latex-workshop.view.pdf.viewer": "tab",
-                "latex-workshop.linting.chktex.enabled": true,
-                "latex-workshop.linting.run": "onType",
-                "latex-workshop.latexindent.path": "latexindent",
-                "latex-workshop.latexindent.args": [
-                    "-c", "%DIR%/",
-                    "%TMPFILE%",
-                    "-l", "%WORKSPACE_FOLDER%/latexindent.yaml",
-                    "-y=defaultIndent: '%INDENT%'"
-                ],
 
                 // ── Spell checker ───────────────────────────────────────
                 "cSpell.language": "en",

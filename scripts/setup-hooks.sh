@@ -22,7 +22,7 @@ cat > "$HOOKS_DIR/pre-commit" << 'HOOK'
 #!/usr/bin/env bash
 # pre-commit hook — checks staged .tex files for formatting issues.
 #
-# 1. Line width check: no prose line > 90 columns (via texwrap.py --check)
+# 1. Line width check: no prose line > 100 columns (via texwrap.py --check)
 # 2. Trailing whitespace check
 # 3. No $$ ... $$ (double-dollar display math)
 # 4. No \eqnarray
@@ -43,9 +43,9 @@ ERRORS=0
 # ── Check 1: Line width via texwrap.py ───────────────────────────────────────
 if [ -f "$REPO_ROOT/scripts/texwrap.py" ]; then
   # shellcheck disable=SC2086
-  if ! python3 "$REPO_ROOT/scripts/texwrap.py" --check --cols 90 $STAGED_TEX; then
+  if ! python3 "$REPO_ROOT/scripts/texwrap.py" --check --cols 100 $STAGED_TEX; then
     echo ""
-    echo "pre-commit: Some .tex files have lines exceeding 90 columns."
+    echo "pre-commit: Some .tex files have lines exceeding 100 columns."
     echo "            Run 'make wrap PROJECT=<dir>' to fix."
     ERRORS=1
   fi

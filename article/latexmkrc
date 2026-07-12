@@ -1,0 +1,18 @@
+# latexmkrc — for the article project.
+#
+# Resolves the shared sty/ and bib/ submodules (one directory up, at the
+# repository root) regardless of the working directory latexmk is invoked
+# from, so \usepackage{di-base} and the bibliography resolve correctly.
+
+use Cwd 'abs_path';
+use File::Basename 'dirname';
+my $root = dirname(dirname(abs_path(__FILE__)));
+
+ensure_path('TEXINPUTS', "$root/sty//:");
+ensure_path('BIBINPUTS', "$root/bib//:");
+
+$pdf_mode = 1;
+$pdflatex = 'pdflatex -interaction=nonstopmode -synctex=1 %O %S';
+
+$biber = 'biber %O %S';
+$out_dir = 'build';

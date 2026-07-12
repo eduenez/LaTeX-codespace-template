@@ -2,7 +2,7 @@
     "editor.fontSize": 14,
     "editor.wordWrap": "on",
     "editor.rulers": [
-        90
+        100
     ],
     "files.eol": "\n",
     "files.trimTrailingWhitespace": true,
