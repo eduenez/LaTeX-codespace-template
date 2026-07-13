@@ -1,23 +1,23 @@
 % article-template.tex — Template for a research paper (amsart class)
 %
-% Compile: latexmk (uses .latexmkrc in this directory)
-% Engine:  XeLaTeX
+% Compile: latexmk (uses .latexmkrc at the project root)
+% Engine:  pdfLaTeX
 
 \documentclass[12pt]{amsart}
 
-% ─── Encoding and Fonts ─────────────────────────────────────────────────────
-\usepackage{fontspec}
-\usepackage{microtype}
+% ─── Encoding, Fonts, and Mathematics ───────────────────────────────────────
+% Engine: pdfLaTeX + STIX Two (comprehensive text + math coverage). UTF-8 input
+% works out of the box on modern LaTeX; inputenc is kept explicit for older
+% installations.
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
 
-% Libertine (serif) + Inconsolata (mono) + matching math
-\usepackage{libertine}
-\usepackage[varqu]{zi4}
-\usepackage[libertine]{newtxmath}
-
-% ─── Mathematics (loaded by amsart, but we add extras) ───────────────────────
+% amsart already loads amsmath and amsthm; we add extras.
 \usepackage{mathtools}
-\let\Bbbk\relax
 \usepackage{amssymb}
+\usepackage{stix2}              % STIX Two text + math fonts (load after amssymb)
+\usepackage{microtype}          % character protrusion + expansion
 
 % ─── Page Layout ─────────────────────────────────────────────────────────────
 \usepackage{geometry}
@@ -55,13 +55,8 @@
 \usepackage[capitalise,noabbrev]{cleveref}
 
 % ─── Bibliography ────────────────────────────────────────────────────────────
-\usepackage[
-  backend=biber,
-  style=alphabetic,
-  sorting=nyt,
-  maxbibnames=10
-]{biblatex}
-\addbibresource{references.bib}
+% BibTeX (not biblatex): use \cite in the text; \bibliographystyle +
+% \bibliography go at the end of the document.
 
 % ─── Collaboration Tools ────────────────────────────────────────────────────
 \usepackage[colorinlistoftodos,textsize=small]{todonotes}
@@ -115,7 +110,7 @@
 % ─── Introduction ────────────────────────────────────────────────────────────
 \section{Introduction}\label{sec:introduction}
 
-The study of widgets was initiated by Doe and Smith \autocite{placeholder2025}.
+The study of widgets was initiated by Doe and Smith~\cite{placeholder2025}.
 In this paper, we establish the following result.
 
 \begin{theorem}\label{thm:main}
@@ -184,15 +179,15 @@ The key ingredient is the following lemma.
 \end{conjecture}
 
 \Cref{conj:converse} is known to hold under additional set-theoretic
-hypotheses; see \autocite{example2024}.
+hypotheses; see~\cite{example2024}.
 
 % ─── Bibliography ────────────────────────────────────────────────────────────
-\printbibliography
+\bibliographystyle{alpha}
+\bibliography{references}
 
 \end{document}
 
 %%% Local Variables:
 %%% mode: LaTeX
-%%% TeX-engine: xetex
 %%% TeX-master: t
 %%% End:

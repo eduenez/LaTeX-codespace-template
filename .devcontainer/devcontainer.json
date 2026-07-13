@@ -48,40 +48,25 @@
                     "editor.defaultFormatter": "James-Yu.latex-workshop"
                 },
                 "latex-workshop.latex.autoBuild.run": "onSave",
-                "latex-workshop.latex.outDir": "%DIR%/build",
+                // The PDF lands at the repo root; intermediates go to build/
+                // (both governed by .latexmkrc). Let latexmk read .latexmkrc
+                // rather than forcing -outdir here.
+                "latex-workshop.latex.outDir": "%DIR%",
                 "latex-workshop.latex.recipes": [
                     {
-                        "name": "latexmk (xelatex)",
-                        "tools": ["latexmk-xelatex"]
-                    },
-                    {
-                        "name": "latexmk (pdflatex)",
-                        "tools": ["latexmk-pdflatex"]
+                        "name": "latexmk",
+                        "tools": ["latexmk"]
                     }
                 ],
                 "latex-workshop.latex.tools": [
                     {
-                        "name": "latexmk-xelatex",
+                        "name": "latexmk",
                         "command": "latexmk",
                         "args": [
-                            "-xelatex",
                             "-synctex=1",
                             "-interaction=nonstopmode",
                             "-file-line-error",
-                            "-outdir=%OUTDIR%",
-                            "%DOC%"
-                        ],
-                        "env": {}
-                    },
-                    {
-                        "name": "latexmk-pdflatex",
-                        "command": "latexmk",
-                        "args": [
-                            "-pdf",
-                            "-synctex=1",
-                            "-interaction=nonstopmode",
-                            "-file-line-error",
-                            "-outdir=%OUTDIR%",
+                            "-cd",
                             "%DOC%"
                         ],
                         "env": {}

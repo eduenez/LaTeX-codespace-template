@@ -1,4 +1,4 @@
-name: LaTeX Lint & Check
+name: LaTeX Lint & Build
 
 on:
   push:
@@ -19,55 +19,43 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install TeX Live (chktex + latexindent)
+      - name: Install chktex
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends \
-            chktex \
-            texlive-latex-extra
+          sudo apt-get install -y --no-install-recommends chktex
 
-      - name: Check line width (monograph)
-        run: python3 scripts/texwrap.py --check --cols 90 monograph/*.tex
+      # Advisory: the project uses semantic wrapping (one sentence/clause per
+      # line via `make wrap`). This surfaces drift as an annotation but does NOT
+      # gate the pipeline — pre-existing prose must not block collaborators.
+      - name: Check semantic wrapping (advisory)
+        continue-on-error: true
+        run: python3 scripts/texwrap.py --check --cols 256 *.tex
 
-      - name: Check line width (article)
-        run: python3 scripts/texwrap.py --check --cols 90 article/*.tex
-
-      - name: Run chktex (monograph)
+      # Advisory: chktex flags style nits (non-breaking spaces, quote style, …)
+      # that never prevent compilation, so it must not gate the build.
+      - name: Run chktex (advisory)
+        continue-on-error: true
         uses: j2kun/chktex-action@main
         with:
-          args: "-q -l .chktexrc monograph/*.tex"
+          args: "-q -l .chktexrc *.tex"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run chktex (article)
-        uses: j2kun/chktex-action@main
-        with:
-          args: "-q -l .chktexrc article/*.tex"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      # Hard gate: these genuinely harm output/portability.
       - name: Check for banned patterns
         run: |
           echo "Checking for banned patterns..."
           ERRORS=0
-
-          # Check for $$ display math
-          if grep -rn '\$\$' --include='*.tex' monograph/ article/; then
-            echo "ERROR: Double-dollar display math found. Use equation*/\\[...\\] instead."
+          if grep -n '\$\$' *.tex; then
+            echo "ERROR: Double-dollar display math found. Use \\[...\\] or equation* instead."
             ERRORS=1
           fi
-
-          # Check for \eqnarray
-          if grep -rn '\\begin{eqnarray' --include='*.tex' monograph/ article/; then
+          if grep -n '\\begin{eqnarray' *.tex; then
             echo "ERROR: \\eqnarray found. Use align/align* instead."
             ERRORS=1
           fi
-
-          if [ "$ERRORS" -ne 0 ]; then
-            exit 1
-          fi
-
-          echo "All pattern checks passed."
+          [ "$ERRORS" -eq 0 ] && echo "All pattern checks passed."
+          exit $ERRORS
 
   build:
     name: Build PDFs
@@ -82,26 +70,27 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends \
             texlive-full \
-            latexmk \
-            biber
+            latexmk
 
-      - name: Build monograph
+      # Build every "main" .tex (one with \documentclass); chapter files
+      # \include'd by a monograph are skipped. Auto-discovery keeps this working
+      # after a child project deletes or renames a template file.
+      - name: Build all main documents
         run: |
-          cd monograph
-          mkdir -p build
-          latexmk monograph-template
-
-      - name: Build article
-        run: |
-          cd article
-          mkdir -p build
-          latexmk article-template
+          shopt -s nullglob
+          built=0
+          for f in *.tex; do
+            if grep -q '\\documentclass' "$f"; then
+              echo "── Building $f ──"
+              latexmk "${f%.tex}"
+              built=1
+            fi
+          done
+          if [ "$built" -eq 0 ]; then echo "No main .tex found"; exit 1; fi
 
       - name: Upload PDFs
         uses: actions/upload-artifact@v4
         with:
           name: compiled-pdfs
-          path: |
-            monograph/build/*.pdf
-            article/build/*.pdf
+          path: "*.pdf"
           retention-days: 14

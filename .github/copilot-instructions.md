@@ -4,9 +4,13 @@ You are assisting with collaborative mathematical writing in LaTeX.
 
 ## Project Context
 
-This repository contains two LaTeX project templates:
-- **monograph/** — a book/monograph using the `memoir` document class (XeLaTeX)
-- **article/** — a research paper using the `amsart` document class (XeLaTeX)
+This repository provides two LaTeX starting points at the repo root (a child
+project keeps one and deletes the other):
+- **monograph-template.tex** — a book/monograph using the `memoir` document class
+- **article-template.tex** — a research paper using the `amsart` document class
+
+Engine: **pdfLaTeX + STIX Two** fonts. Bibliography: **BibTeX** (a single root
+`references.bib`, style `alpha`). See `STYLE.md` for the full conventions.
 
 ## LaTeX Conventions
 
@@ -22,8 +26,8 @@ This repository contains two LaTeX project templates:
 - Prefixes: `thm:`, `lem:`, `prop:`, `cor:`, `def:`, `exa:`, `rem:`, `notn:`, `eq:`, `sec:`, `cha:`, `fig:`, `conj:`.
 
 ### Formatting
-- **One sentence per line** — start a new line after each period.
-- **90 column limit** for prose lines.
+- **One sentence per line** (semantic wrapping) — start a new line after each
+  sentence and each semicolon/colon clause. Run `make wrap` to normalize.
 - **2-space indentation** inside environments.
 - No tabs, no trailing whitespace.
 - Use semantic commands (`\RR`, `\norm{x}`) instead of raw LaTeX (`\mathbb{R}`, `\|x\|`).
@@ -34,10 +38,13 @@ Use the theorem-like environments defined in each template's preamble:
 
 ### Collaboration
 - Use `\todo{...}` for notes and reminders (todonotes package).
-- Use `\autocite{key}` for citations (biblatex).
+- Use `\cite{key}` for citations (BibTeX); prefer a non-breaking space before it
+  (`Doe~\cite{Doe:2020}`). The bibliography is `\bibliographystyle{alpha}` +
+  `\bibliography{references}` at the end of the main file.
 - Define macros in the preamble for repeated notation.
 
 ## Build
-- Compile with `latexmk` (configured for XeLaTeX via `.latexmkrc`).
-- Build artifacts go to `build/` — never edit or reference these.
-- Use `make monograph` or `make article` from the repository root.
+- Compile with `latexmk` (configured for pdfLaTeX via `.latexmkrc`).
+- The finished PDF lands at the repo root; intermediates go to `build/` — never
+  edit or reference the `build/` files.
+- Use `make build` from the repository root (builds every main document).

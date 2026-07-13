@@ -1,16 +1,23 @@
 # .latexmkrc — latexmk configuration
 #
-# Engine: XeLaTeX (change $pdf_mode to 1 for pdflatex)
-# Output directory: build/  (keeps the source tree free of build artifacts)
+# Engine: pdfLaTeX (uniform across the group's repositories; STIX Two fonts).
+#
+# Output layout: the PDF (the product) lands next to the source at the repo
+# root; all intermediate files (.aux, .log, .fls, .fdb_latexmk, .bbl, .out, …)
+# are tucked into build/ (the "working directory"). This is the
+# $aux_dir/$out_dir split — latexmk moves the final PDF from the aux dir back
+# to $out_dir. build/ and the root *.pdf are both gitignored.
+#
+# NOTE: this governs latexmk only. A manual `pdflatex; bibtex; pdflatex`
+# sequence ignores this file and writes everything to the current directory —
+# that still works; it just leaves the intermediates at the root.
 
-$pdf_mode = 5;          # xelatex → xdv → xdvipdfmx → PDF
-$out_dir  = 'build';    # all artifacts go here
+$aux_dir = 'build';
+$out_dir = '.';
 
-# Ensure latexmk can find source files when building from subdirectories.
-ensure_path('TEXINPUTS', './');
+$pdf_mode = 1;   # pdflatex → PDF
+$pdflatex = 'pdflatex -interaction=nonstopmode -synctex=1 %O %S';
 
-# Silence latexmk about missing build dirs for \include'd files.
+# Monographs \include chapter files; $emulate_aux lets latexmk manage their
+# per-file .aux inside $aux_dir without "cannot find .aux" complaints.
 $emulate_aux = 1;
-
-# Enable SyncTeX for forward/inverse search in VS Code.
-$xelatex = 'xelatex -synctex=1 -interaction=nonstopmode -file-line-error %O %S';
