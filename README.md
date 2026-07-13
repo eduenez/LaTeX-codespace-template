@@ -75,6 +75,36 @@ make format    # wrap + latexindent
 make check     # dry-run: what isn't wrapped
 ```
 
+## Bibliography workflow
+
+This template ships a plain [`references.bib`](references.bib) (BibTeX, no
+submodule — a plain clone builds). The group also maintains a shared master
+database, [`math-bibliography`](https://github.com/eduenez/math-bibliography),
+which is the **canonical source of truth**: it is kept tidied (`bibtex-tidy`)
+and **sorted case-insensitively by key**, so you may assume any copy taken from
+it is already clean and sorted.
+
+The workflow for a project built from this template:
+
+1. **Seed.** Copy the entries you need (or the whole file) from the master into
+   this repo's `references.bib`. Keys follow `Author-Author:YYYY`
+   (e.g. `MacLane-Moerdijk:1992`).
+2. **Cite** with `\cite{key}` — BibTeX emits only the works you actually cite,
+   so a large `references.bib` does not bloat the compiled bibliography.
+3. **Contribute back.** When you add a new entry that others could reuse, add it
+   to the master too (in sorted position — run its `hooks/sort-bib.sh` after
+   adding several), so the whole group benefits.
+4. **Re-sync periodically.** Re-copy `references.bib` from the master to pick up
+   upstream additions and the canonical ordering.
+
+This deliberately trades the automatic propagation of a git submodule for
+**zero submodule friction** — collaborators clone and build with no
+`git submodule` steps, and no exposure to biblatex/biber. The cost is the manual
+re-sync in step 4.
+
+> BibTeX has no comment syntax and treats a bare `@` as the start of an entry —
+> keep bare at-signs out of `references.bib` header comments.
+
 ## Checks are advisory (they won't block you)
 
 This template deliberately does **not** block collaborators on formatting:
