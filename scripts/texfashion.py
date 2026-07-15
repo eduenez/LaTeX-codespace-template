@@ -101,6 +101,18 @@ MATH_ENVS: frozenset = frozenset(
     }
 )
 
+# Macros whose braced argument LaTeX later feeds through \MakeUppercase to
+# build a running head (amsart uses \title and \author this way).  TeX's
+# \uppercase primitive operates on raw character tokens, so a *composed*
+# Unicode glyph (curly quote “”, en/em dash, accented letter) is split into
+# its orphaned UTF-8 continuation bytes there, and inputenc then aborts with
+# "Invalid UTF-8 byte" / "Unicode character … not set up".  We therefore copy
+# these arguments VERBATIM — leaving ASCII ligatures (``…'' , ---) and \'e-style
+# accents untouched.  Those render identically (`` `` '' `` are curly quotes via
+# TeX's font ligatures) but survive \uppercase.  Quotes/accents everywhere else
+# (body, footnotes, section headings) are still modernized normally.
+PROTECTED_ARG_MACROS: frozenset = frozenset({"title", "author"})
+
 # ---------------------------------------------------------------------------
 # Accent tables
 # ---------------------------------------------------------------------------
@@ -350,6 +362,55 @@ def transform(text: str) -> str:
                         i += 2
                     elif i < n and text[i] == " ":
                         i += 1
+                    continue
+
+                # running-head macros (\title, \author): copy the whole
+                # invocation verbatim so composed Unicode never reaches
+                # \MakeUppercase.  See PROTECTED_ARG_MACROS.
+                if (not in_math()) and name in PROTECTED_ARG_MACROS:
+                    p = j
+                    # skip whitespace, then any optional [...] arguments
+                    while True:
+                        while p < n and text[p] in " \t":
+                            p += 1
+                        if p < n and text[p] == "[":
+                            depth = 0
+                            while p < n:
+                                if text[p] == "\\":
+                                    p += 2
+                                    continue
+                                if text[p] == "[":
+                                    depth += 1
+                                elif text[p] == "]":
+                                    depth -= 1
+                                    if depth == 0:
+                                        p += 1
+                                        break
+                                p += 1
+                            continue
+                        break
+                    # copy the mandatory {...} argument verbatim
+                    if p < n and text[p] == "{":
+                        depth = 0
+                        q = p
+                        while q < n:
+                            if text[q] == "\\":
+                                q += 2
+                                continue
+                            if text[q] == "{":
+                                depth += 1
+                            elif text[q] == "}":
+                                depth -= 1
+                                if depth == 0:
+                                    q += 1
+                                    break
+                            q += 1
+                        out.append(text[i:q])
+                        i = q
+                        continue
+                    # no braced argument found — copy just the control word
+                    out.append(text[i:j])
+                    i = j
                     continue
 
                 # any other macro: copy the control word, leave args alone
