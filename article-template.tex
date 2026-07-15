@@ -95,6 +95,10 @@
 \keywords{keyword one, keyword two, keyword three}
 
 % ═══════════════════════════════════════════════════════════════════════════════
+
+%#
+%# DOCUMENT: Title of the Paper
+%#
 \begin{document}
 
 \begin{abstract}
@@ -108,6 +112,10 @@
 \maketitle
 
 % ─── Introduction ────────────────────────────────────────────────────────────
+
+%#
+%## SECTION: Introduction
+%#
 \section{Introduction}\label{sec:introduction}
 
 The study of widgets was initiated by Doe and Smith~\cite{placeholder2025}.
@@ -119,17 +127,27 @@ In this paper, we establish the following result.
 
 The proof of \cref{thm:main} is given in \cref{sec:proof}.
 
+%#
+%### SUBSECTION: Organization
+%#
 \subsection*{Organization}
 
 In \cref{sec:preliminaries}, we recall the necessary definitions.
 \Cref{sec:proof} contains the proof of \cref{thm:main}.
 We conclude in \cref{sec:remarks} with open questions.
 
+%#
+%### SUBSECTION: Acknowledgements
+%#
 \subsection*{Acknowledgements}
 
 \todo{Add acknowledgements.}
 
 % ─── Preliminaries ──────────────────────────────────────────────────────────
+
+%#
+%## SECTION: Preliminaries
+%#
 \section{Preliminaries}\label{sec:preliminaries}
 
 We fix notation and recall the basic definitions.
@@ -138,9 +156,12 @@ We fix notation and recall the basic definitions.
   A \emph{widget} is a pair $(X, \tau)$ where $X$ is a set and
   $\tau \subseteq \mathcal{P}(X)$ satisfies:
   \begin{enumerate}
-    \item $\emptyset, X \in \tau$;
-    \item $\tau$ is closed under arbitrary unions;
-    \item $\tau$ is closed under finite intersections.
+  \item
+    $\emptyset, X \in \tau$;
+  \item
+    $\tau$ is closed under arbitrary unions;
+  \item
+    $\tau$ is closed under finite intersections.
   \end{enumerate}
 \end{definition}
 
@@ -150,6 +171,10 @@ We fix notation and recall the basic definitions.
 \end{definition}
 
 % ─── Main Proof ──────────────────────────────────────────────────────────────
+
+%#
+%## SECTION: Proof of the Main Theorem
+%#
 \section{Proof of the Main Theorem}\label{sec:proof}
 
 The key ingredient is the following lemma.
@@ -172,6 +197,10 @@ The key ingredient is the following lemma.
 \end{proof}
 
 % ─── Concluding Remarks ─────────────────────────────────────────────────────
+
+%#
+%## SECTION: Concluding Remarks
+%#
 \section{Concluding Remarks}\label{sec:remarks}
 
 \begin{conjecture}\label{conj:converse}
@@ -179,7 +208,8 @@ The key ingredient is the following lemma.
 \end{conjecture}
 
 \Cref{conj:converse} is known to hold under additional set-theoretic
-hypotheses; see~\cite{example2024}.
+hypotheses;
+see~\cite{example2024}.
 
 % ─── Bibliography ────────────────────────────────────────────────────────────
 \bibliographystyle{alpha}
