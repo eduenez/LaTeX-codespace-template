@@ -15,7 +15,11 @@ latexindent into an idempotent `reflow` (wrap → indent).
 Break rules apply ONLY in text mode.  Inline math ($…$, $$…$$, \\(…\\),
 \\[…\\]) and comments (% to end of line) are never broken — inside a
 formula a ";" or ":" separates arguments (e.g. $H(p, q; c, d)$) and must
-not force a line break.  Break-point rules (in order of priority):
+not force a line break.  The mandatory clause/sentence breaks (rules 1–2)
+are likewise suppressed inside a braced macro argument — the ";" in
+\\subjclass{Primary; Secondary} or the ":" in \\title{Foo: Bar} is
+punctuation *within* an argument, not a prose clause boundary (brace
+nesting is tracked per line).  Break-point rules (in order of priority):
 
   1. MANDATORY — Sentence end (". ", "? ", "! ", etc.): always ends a
      file line, even if the sentence is short.
@@ -209,6 +213,58 @@ def _scan_regions(s: str, start_in_math: bool = False) -> list[int]:
     return region
 
 
+def _brace_depth_map(s: str, region: list[int]) -> list[int]:
+    """Return the brace-group nesting depth at each character of *s*.
+
+    Counts unescaped ``{`` / ``}`` outside comments (``\\{`` and ``\\}`` are
+    literal, not delimiters; braces inside a comment are ignored).  For an
+    opening ``{`` the recorded depth is the level *outside* the group; for a
+    closing ``}`` it is the level *after* closing — so a character strictly
+    inside a group has depth ≥ 1.
+
+    Used to keep the mandatory clause/sentence breaks (rules 1–2) out of
+    braced macro arguments: a ``;`` in ``\\subjclass{Primary; Secondary}`` or
+    a ``:`` in ``\\title{Foo: Bar}`` is punctuation *inside* an argument, not a
+    prose clause boundary, and must not force a line break.  Tracking is
+    per-line (a group opened on an earlier source line is not carried over).
+    """
+    n = len(s)
+    depth = [0] * n
+    d = 0
+    i = 0
+    while i < n:
+        if region[i] == _R_COMMENT:
+            depth[i] = d
+            i += 1
+            continue
+        c = s[i]
+        if c == "\\":  # escape: this char and the next are literal
+            depth[i] = d
+            if i + 1 < n:
+                depth[i + 1] = d
+            i += 2
+            continue
+        if c == "{":
+            depth[i] = d
+            d += 1
+            i += 1
+            continue
+        if c == "}":
+            d = max(0, d - 1)
+            depth[i] = d
+            i += 1
+            continue
+        depth[i] = d
+        i += 1
+    return depth
+
+
+def _depth_at(depth: list[int], idx: int, n: int) -> int:
+    """Brace depth at *idx*; a break position at end-of-line (idx ≥ n) counts
+    as top level (0) — there is no dangling open group to protect."""
+    return depth[idx] if idx < n else 0
+
+
 def _is_sentence_end(text: str, i: int) -> bool:
     """Return True if text[i] is sentence-ending punctuation before a space.
 
@@ -341,11 +397,18 @@ def _mandatory_split(line: str) -> list[str]:
     n = len(line)
     # Only break in text mode: never inside inline math or a comment.
     region = _scan_regions(line)
+    # …and never at a boundary that lands inside a braced macro argument.
+    depth = _brace_depth_map(line, region)
 
     while i < n:
-        # Rule 1: sentence end (text mode only)
+        # Rule 1: sentence end (text mode, at top level only)
         if region[i] == _R_TEXT and _is_sentence_end(line, i):
             bp = _break_after_sentence_end(line, i)
+            # Suppress if the continuation is still inside a brace group — the
+            # sentence ends *within* a macro argument, not in running text.
+            if _depth_at(depth, bp, n) != 0:
+                i += 1
+                continue
             pieces.append(line[start:bp].rstrip())
             start = bp
             # Continuation gets the original indent
@@ -354,7 +417,7 @@ def _mandatory_split(line: str) -> list[str]:
             i = start
             continue
 
-        # Rule 2: semicolon or colon (text mode only)
+        # Rule 2: semicolon or colon (text mode, at top level only)
         if region[i] == _R_TEXT and line[i] in ";:" and i + 1 < n and line[i + 1] == " ":
             if line[i] == ":":
                 # Exclude := and ::
@@ -362,6 +425,11 @@ def _mandatory_split(line: str) -> list[str]:
                 if nxt in ("=", ":"):
                     i += 1
                     continue
+            # Suppress a clause break inside a braced argument, e.g. the ";" in
+            # \subjclass{Primary; Secondary} or the ":" in \title{Foo: Bar}.
+            if depth[i] != 0:
+                i += 1
+                continue
             bp = i + 2
             pieces.append(line[start:bp].rstrip())
             start = bp
