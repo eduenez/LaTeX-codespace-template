@@ -69,6 +69,21 @@ harmless; still, type them correctly from the start.
   as 8, so tabs wreck indentation. Set your editor to insert **two spaces** for
   the Tab key; `make fashion` expands any stray tab to two spaces.
 
+> **Exception — `\title` and `\author` MUST use the archaic ASCII spellings.**
+> Inside `\title{…}` and `\author{…}`, quotes and accents are **required** to be
+> the old TeX forms — `` ``…'' `` / `` `…' `` for quotes, `\'e` / `\"o` / `\c{c}`
+> for accents — **never** the Unicode characters `“ ” ‘ ’` or `é ö ç`.
+> `amsart` runs the title and author through `\MakeUppercase` to build the page
+> running heads, and TeX's `\uppercase` primitive shreds a composed Unicode glyph
+> into its raw UTF-8 bytes, so `latexmk` aborts with
+> `Invalid UTF-8 byte` / `Unicode character … not set up for use with LaTeX`.
+> The ASCII forms render *identically* (TeX's font ligatures still produce curly
+> quotes, `\'e` still prints é) but survive uppercasing. `make fashion` knows
+> this and deliberately leaves `\title`/`\author` untouched — so if you type
+> `“…”` there by hand, it will **not** rescue you; the 1990s spellings are
+> mandatory in exactly these two places. (Everywhere else — body, footnotes,
+> even `\section` headings — use modern Unicode as above.)
+
 This depends on the preamble loading `\usepackage[utf8]{inputenc}` and
 `\usepackage[T1]{fontenc}` (both templates do): T1 gives real accented glyphs so
 accented words hyphenate and copy cleanly from the PDF.
