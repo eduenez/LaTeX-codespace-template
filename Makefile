@@ -8,10 +8,13 @@
 # Targets:
 #   make                 – show help
 #   make build           – build every main document (auto-discovered)
-#   make wrap            – semantic line-wrap all .tex
-#   make indent          – latexindent all .tex
-#   make format          – wrap + indent
-#   make check           – dry-run: report .tex needing wrapping
+#   make format          – do it all: fashion + reflow (idempotent)
+#   make reflow          – wrap + indent (idempotent re-flow)
+#   make fashion         – modernize typography (accents, quotes, tabs)
+#   make wrap            – semantic line-wrap all .tex (break positions only)
+#   make indent          – whitespace/indentation normalization (latexindent)
+#   make sep             – normalize sectioning banners (advisory)
+#   make check           – dry-run: report .tex needing fashion/wrapping
 #   make lint            – run chktex on all .tex
 #   make clean           – remove build/ and stray auxiliaries
 #   make install-hooks   – install the advisory git pre-commit hook
@@ -22,7 +25,7 @@ TEX_SRC := $(wildcard *.tex)
 # Main documents = files that contain \documentclass.
 MAIN_SRC := $(shell grep -l '\\documentclass' $(TEX_SRC) 2>/dev/null)
 
-.PHONY: all help build wrap indent format check lint clean install-hooks
+.PHONY: all help build format reflow fashion wrap indent sep check lint clean install-hooks
 
 all: help
 
@@ -30,14 +33,22 @@ all: help
 help:
 	@echo "LaTeX Project — Makefile Targets"
 	@echo ""
-	@echo "  make build           Build every main document (pdfLaTeX via latexmk)"
-	@echo "  make wrap            Semantic line-wrap all .tex"
-	@echo "  make indent          Indentation normalization (latexindent)"
-	@echo "  make format          wrap + indent"
-	@echo "  make check           Dry-run: report .tex needing wrapping"
-	@echo "  make lint            Run chktex on all .tex"
-	@echo "  make clean           Remove build/ and stray auxiliaries"
-	@echo "  make install-hooks   Install the advisory git pre-commit hook"
+	@echo "  Building:"
+	@echo "    make build           Build every main document (pdfLaTeX via latexmk)"
+	@echo ""
+	@echo "  Formatting:"
+	@echo "    make format          Do it all: fashion + reflow"
+	@echo "    make reflow          Re-flow: wrap + indent (idempotent)"
+	@echo "    make fashion         Modernize typography (accents, quotes, tabs)"
+	@echo "    make wrap            Semantic line-wrap only (break positions)"
+	@echo "    make indent          Whitespace/indentation normalization (latexindent)"
+	@echo "    make sep             Normalize sectioning banners (advisory)"
+	@echo "    make check           Dry-run: report .tex needing fashion/wrapping"
+	@echo ""
+	@echo "  Linting & cleaning:"
+	@echo "    make lint            Run chktex on all .tex"
+	@echo "    make clean           Remove build/ and stray auxiliaries"
+	@echo "    make install-hooks   Install the advisory git pre-commit hook"
 	@echo ""
 	@echo "  Main documents detected: $(MAIN_SRC)"
 
@@ -49,23 +60,44 @@ build:
 	  latexmk "$${f%.tex}"; \
 	done
 
-## wrap: Semantic line-wrapping
+## format: Do it all — modernize typography, then reflow
+format:
+	@$(MAKE) --no-print-directory fashion
+	@$(MAKE) --no-print-directory reflow
+
+## reflow: Re-flow prose — semantic wrap, then normalize whitespace/indentation.
+## Idempotent: texwrap measures de-indented width and preserves whitespace;
+## latexindent owns all indentation and blank lines, so the two cannot fight.
+reflow:
+	@$(MAKE) --no-print-directory wrap
+	@$(MAKE) --no-print-directory indent
+
+## fashion: Modernize typography (accents -> Unicode, curly quotes, tabs -> spaces)
+fashion:
+	python3 scripts/texfashion.py $(TEX_SRC)
+
+## wrap: Semantic line-wrapping (break positions only; whitespace-preserving)
 wrap:
 	python3 scripts/texwrap.py --cols $(COLS) $(TEX_SRC)
 
-## indent: Indentation normalization (latexindent)
+## indent: Whitespace normalization (latexindent). -m enables blank-line
+## condensing; with this config it makes no other line-break changes.
 indent:
 	@for f in $(TEX_SRC); do \
-	  latexindent -w -s -l latexindent.yaml "$$f" \
+	  latexindent -m -w -s -l latexindent.yaml "$$f" \
 	    && echo "latexindent: formatted  $$f"; \
 	done
 
-## format: Full formatting pass (wrap then indent)
-format: wrap indent
+## sep: Normalize sectioning banners (STYLE.md; advisory, comment-only)
+sep:
+	python3 scripts/texsep.py $(TEX_SRC)
 
-## check: Report .tex needing wrapping (no changes)
+## check: Report .tex needing fashion/wrapping (no changes; latexindent has no dry-run)
 check:
-	python3 scripts/texwrap.py --check --cols $(COLS) $(TEX_SRC)
+	@rc=0; \
+	python3 scripts/texfashion.py --check $(TEX_SRC) || rc=1; \
+	python3 scripts/texwrap.py --check --cols $(COLS) $(TEX_SRC) || rc=1; \
+	exit $$rc
 
 ## lint: Run chktex on all .tex
 lint:

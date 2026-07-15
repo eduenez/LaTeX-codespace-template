@@ -24,6 +24,12 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends chktex
 
+      # Advisory: modern typography (accents → Unicode, curly quotes, no tabs)
+      # via `make fashion`. Surfaces drift as an annotation; never gates.
+      - name: Check typography (advisory)
+        continue-on-error: true
+        run: python3 scripts/texfashion.py --check *.tex
+
       # Advisory: the project uses semantic wrapping (one sentence/clause per
       # line via `make wrap`). This surfaces drift as an annotation but does NOT
       # gate the pipeline — pre-existing prose must not block collaborators.
