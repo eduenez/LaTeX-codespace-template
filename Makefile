@@ -25,7 +25,7 @@ TEX_SRC := $(wildcard *.tex)
 # Main documents = files that contain \documentclass.
 MAIN_SRC := $(shell grep -l '\\documentclass' $(TEX_SRC) 2>/dev/null)
 
-.PHONY: all help build format reflow fashion wrap indent sep check lint clean install-hooks
+.PHONY: all help build article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(MAIN_SRC) $(MAIN_SRC:.tex=)
 
 all: help
 
@@ -35,6 +35,8 @@ help:
 	@echo ""
 	@echo "  Building:"
 	@echo "    make build           Build every main document (pdfLaTeX via latexmk)"
+	@echo "                         synonyms: article, pdf, PDF, compile"
+	@echo "    make <name>          Build one document by name, e.g. make $(firstword $(MAIN_SRC:.tex=))"
 	@echo ""
 	@echo "  Formatting:"
 	@echo "    make format          Do it all: fashion + reflow"
@@ -52,13 +54,19 @@ help:
 	@echo ""
 	@echo "  Main documents detected: $(MAIN_SRC)"
 
-## build: Build every main document
-build:
+## build: Build every main document.  Synonyms (same effect): article, pdf,
+## PDF, compile — so authors can type whichever reads naturally.
+build article pdf PDF compile:
 	@if [ -z "$(MAIN_SRC)" ]; then echo "No main .tex (with \\documentclass) found."; exit 1; fi
 	@for f in $(MAIN_SRC); do \
 	  echo "── Building $$f ──"; \
 	  latexmk "$${f%.tex}"; \
 	done
+
+# Build a single named document: `make NFL` or `make NFL.tex` (one target per
+# main file, generated from MAIN_SRC), for repos with several documents.
+$(MAIN_SRC) $(MAIN_SRC:.tex=):
+	@latexmk "$(basename $@)"
 
 ## format: Do it all — modernize typography, then reflow
 format:
