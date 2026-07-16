@@ -5,78 +5,15 @@
 
 \documentclass[12pt]{amsart}
 
-% ─── Encoding, Fonts, and Mathematics ───────────────────────────────────────
-% Engine: pdfLaTeX + STIX Two (comprehensive text + math coverage). UTF-8 input
-% works out of the box on modern LaTeX; inputenc is kept explicit for older
-% installations.
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[english]{babel}
-
-% amsart already loads amsmath and amsthm; we add extras.
-\usepackage{mathtools}
-\usepackage{amssymb}
-\usepackage{stix2}              % STIX Two text + math fonts (load after amssymb)
-\usepackage{microtype}          % character protrusion + expansion
-
-% ─── Page Layout ─────────────────────────────────────────────────────────────
-\usepackage{geometry}
-\geometry{margin=1in}
-
-% ─── Theorem-like Environments ───────────────────────────────────────────────
-% amsart provides \newtheorem; we define our environments here.
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{conjecture}[theorem]{Conjecture}
-
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-
-\theoremstyle{remark}
-\newtheorem{remark}[theorem]{Remark}
-
-% ─── Graphics, Diagrams, and Colors ─────────────────────────────────────────
-\usepackage{graphicx}
-\usepackage{xcolor}
-\usepackage{tikz}
-\usepackage{tikz-cd}
-
-% ─── Cross-referencing ───────────────────────────────────────────────────────
-\usepackage[
-  colorlinks=true,
-  linkcolor=blue!40!black,
-  citecolor=green!40!black,
-  urlcolor=magenta!40!black
-]{hyperref}
-\usepackage[capitalise,noabbrev]{cleveref}
-
-% ─── Bibliography ────────────────────────────────────────────────────────────
-% BibTeX (not biblatex): use \cite in the text; \bibliographystyle +
-% \bibliography go at the end of the document.
-
-% ─── Collaboration Tools ────────────────────────────────────────────────────
-\usepackage[colorinlistoftodos,textsize=small]{todonotes}
-
-% ─── Custom Macros ───────────────────────────────────────────────────────────
-
-% Number sets
-\newcommand{\NN}{\mathbb{N}}
-\newcommand{\ZZ}{\mathbb{Z}}
-\newcommand{\QQ}{\mathbb{Q}}
-\newcommand{\RR}{\mathbb{R}}
-\newcommand{\CC}{\mathbb{C}}
-
-% Delimiters
-\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
-\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
-\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
-
-% Operators
-\DeclareMathOperator{\id}{id}
+% ═════════════════════════════════════════════════════════════════════════════
+% ┃ ALL \usepackage, macro, and environment declarations live in                ┃
+% ┃ article-template.sty (loaded below), which loads the vendored shared        ┃
+% ┃ packages from packages/ and then this project's additions. Do NOT add       ┃
+% ┃ \usepackage / \newcommand / \newtheorem here. This preamble carries ONLY    ┃
+% ┃ the document class, that one style package, and semantic metadata           ┃
+% ┃ (title / author / date / subjclass / keywords). See STYLE.md.               ┃
+% ═════════════════════════════════════════════════════════════════════════════
+\usepackage{article-template}
 
 % ─── Document Metadata ──────────────────────────────────────────────────────
 \title{Title of the Paper}

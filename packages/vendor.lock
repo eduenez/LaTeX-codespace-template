@@ -1,0 +1,24 @@
+# vendor.lock — provenance pins for vendored shared files ("poor man's submodule")
+#
+# Machine-readable record of what each vendored file is and where it came from.
+# Columns:  <local file>  <upstream repo>  <commit>
+#
+# The .sty files in this directory are PRISTINE copies (byte-identical to the
+# pinned commit) — do NOT edit them here (see _DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md).
+# To update, re-copy from the upstream repo at a newer commit and bump the hash.
+#
+# references.bib is the one exception: it is vendored but EDITABLE (add citations
+# locally); the pin records the last sync point from the master so local
+# additions can be diffed and backported upstream.
+#
+# This template ships BOTH class bases: article-template.sty loads
+# di-base-article, monograph-template.sty loads di-base-monograph.
+
+di-base-core.sty       eduenez/LaTeX-shared-files  af98e4f
+di-base-article.sty    eduenez/LaTeX-shared-files  af98e4f
+di-base-monograph.sty  eduenez/LaTeX-shared-files  af98e4f
+di-structures.sty      eduenez/LaTeX-shared-files  af98e4f
+di-ramsey.sty          eduenez/LaTeX-shared-files  af98e4f
+di-random.sty          eduenez/LaTeX-shared-files  af98e4f
+di-exercises.sty       eduenez/LaTeX-shared-files  af98e4f
+references.bib         eduenez/math-bibliography   afa0d2d

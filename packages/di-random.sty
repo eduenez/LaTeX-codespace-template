@@ -1,0 +1,56 @@
+%% di-random.sty — Dueñez–Iovino notation for randomized structures
+%%
+%% Notation specific to Keisler randomizations, probability algebras,
+%% and stochastic structures.  Extends di-structures.sty.
+%%
+%% Requires di-base and di-structures to be loaded first.
+%%
+%% SCOPE NOTE: This file contains only macros that are CONSISTENT across
+%% all randomization manuscripts.  Paper-specific pairing notation, L^p
+%% variants, type-space families (\Btp, \Ctp, etc.), C(\frak b) notation,
+%% Stone-space families, and weak-* notation vary between papers and must
+%% remain in each paper's local preamble.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{di-random}[2026/06/01 Duenez-Iovino randomized structures notation]
+
+\RequirePackage{svrsymbols}  % \dicevi for randomization symbol
+
+% ── Randomization symbol ─────────────────────────────────────────────────────
+
+\newcommand{\rnd}{\dicevi}   % randomization functor (math-mode dice symbol from svrsymbols)
+\newcommand{\frnd}{\mathfrak{r}}          % fraktur randomization
+\newcommand{\fMrnd}{\mathfrak{M}^{\rnd}}
+\newcommand{\fNrnd}{\mathfrak{N}^{\rnd}}
+
+% ── Bold capital families (random variables, vectors) ────────────────────────
+
+\newcommand{\Ba}{\mathbf{a}}
+\providecommand{\Bb}{\mathbf{b}}  % di-ramsey defines \Bb as \cB_{<\infty}; yield to it
+\newcommand{\Bc}{\mathbf{c}}
+\newcommand{\Bd}{\mathbf{d}}
+\newcommand{\Be}{\mathbf{e}}
+\newcommand{\Bx}{\mathbf{x}}
+\newcommand{\By}{\mathbf{y}}
+\newcommand{\Bz}{\mathbf{z}}
+\newcommand{\Bbx}{\bar{\mathbf{x}}}
+\newcommand{\Bby}{\bar{\mathbf{y}}}
+\newcommand{\Bbz}{\bar{\mathbf{z}}}
+\newcommand{\Bone}{\mathbf{1}}
+\newcommand{\Bzero}{\mathbf{0}}
+
+% ── Standard-part and algebraic operators ────────────────────────────────────
+
+\DeclareMathOperator{\Std}{std}          % standard part
+
+% ── Vector probability space families (generic names with no conflict) ────────
+
+\newcommand{\VLoi}{V_{L^{1}}}
+\newcommand{\Vprob}{V_{\mathrm{prob}}}
+\newcommand{\Vddvec}{V_{\mathrm{ddvec}}}
+\newcommand{\Vinf}{V_{\infty}}
+
+% ── Miscellaneous ─────────────────────────────────────────────────────────────
+
+\newcommand{\rsup}{\mathrm{sup}}
+\newcommand{\lvec}[1]{\vec{#1}}          % vector arrow (override locally for \overleftarrow)

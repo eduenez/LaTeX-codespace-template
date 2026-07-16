@@ -12,6 +12,11 @@
 # sequence ignores this file and writes everything to the current directory —
 # that still works; it just leaves the intermediates at the root.
 
+# The vendored shared packages (di-base-core, di-base-article,
+# di-base-monograph, …) live in packages/; add it to TEXINPUTS so
+# \usepackage{di-base-article} etc. resolve without a path prefix.
+ensure_path('TEXINPUTS', './packages//');
+
 $aux_dir = 'build';
 $out_dir = '.';
 
