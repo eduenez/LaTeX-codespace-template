@@ -1,0 +1,128 @@
+%% di-ramsey.sty — Dueñez–Iovino notation for Ramsey theory and combinatorics
+%%
+%% Notation for ultrafilter semigroups, continuous Ramsey theory, Hindman's
+%% theorem, and stable Boolean algebras.  Extends di-structures.sty.
+%%
+%% Requires di-base and di-structures to be loaded first.
+%%
+%% SCOPE NOTE: This file covers only macros that are CONSISTENT across the
+%% Ramsey manuscripts (ProbabilityModels, RandomizedStructures,
+%% Numakuras_Lemma).  Paper-specific macros (phi-variants, probability
+%% interval notation Pgg/Pll, local function families fAC/fSg etc.,
+%% measure families muZ/nuZ) must remain in each paper's local preamble.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{di-ramsey}[2026/05/31 Duenez-Iovino Ramsey and combinatorics]
+
+% ── Łukasiewicz identifier ───────────────────────────────────────────────────
+
+\newcommand{\Luk}{{\L}ukasiewicz}
+
+% ── Language family notation ─────────────────────────────────────────────────
+%
+% In these papers \cL denotes the Ramsey language (inherited from di-structures
+% as \cL = \mathcal{L}).  The families below are subscript/superscript variants.
+
+% Basic language variants
+\newcommand{\LOr}{\ensuremath{\cL^{\phi}}}       % ordered language
+\newcommand{\LOB}{\ensuremath{\cL^{\phi}_{\cB}}} % ordered + Boolean
+\newcommand{\pLOr}{\ensuremath{\Sigma\LOr}}
+\newcommand{\LOri}{\ensuremath{\cL^{\phi_i}}}
+\newcommand{\pLone}{\ensuremath{\Sigma\Lone}}     % \Lone from di-structures
+
+% Subscripted language families
+\newcommand{\LAC}{\ensuremath{\cL_{\mathrm{AC}}}}
+\newcommand{\LSg}{\ensuremath{\cL_{\mathrm{Sg}}}}
+\newcommand{\LSI}{\ensuremath{\cL_{\infty}}}
+\newcommand{\Lb}{\ensuremath{\cL^{<\infty}}}
+\newcommand{\LFS}{\ensuremath{\cL_{\sigma}}}
+\newcommand{\Linff}{\ensuremath{\cL^{\infty}}}  % alias for \Linf in this context
+\newcommand{\Lphi}{\ensuremath{\cL^{\phi}}}
+\newcommand{\LSp}{\ensuremath{\cL^{1}_{\mathrm{Simp}}}}
+
+% Primed (positive) variants
+\newcommand{\LACp}{\ensuremath{\LAC^{+}}}
+\newcommand{\LSgp}{\ensuremath{\LSg^{+}}}
+\newcommand{\LSIp}{\ensuremath{\LSI^{+}}}
+\newcommand{\Lbp}{\ensuremath{\Lb^{+}}}
+\newcommand{\LFSp}{\ensuremath{\LFS^{+}}}
+
+% LO-subscripted families (ordered language variants)
+\newcommand{\LOAC}{\ensuremath{\LOr_{\mathrm{AC}}}}
+\newcommand{\LOSg}{\ensuremath{\LOr_{\mathrm{Sg}}}}
+\newcommand{\LOSI}{\ensuremath{\LOr_{\infty}}}
+\newcommand{\LOb}{\ensuremath{\LOr_{<\infty}}}
+\newcommand{\LOFS}{\ensuremath{\LOr_{\sigma}}}
+\newcommand{\LOACp}{\ensuremath{\LOAC^{+}}}
+\newcommand{\LOSgp}{\ensuremath{\LOSg^{+}}}
+\newcommand{\LOSIp}{\ensuremath{\LOSI^{+}}}
+\newcommand{\LObp}{\ensuremath{\LOb^{+}}}
+
+% L(structure) variants
+\newcommand{\LOSp}[1]{\ensuremath{\cL^{\phi{#1}}_{\mathrm{Simp}}}}
+\newcommand{\LOS}{\ensuremath{L^{\phi}}}
+\newcommand{\LOBS}{\ensuremath{L^{\phi}_{\cB}}}
+\newcommand{\LBS}{\ensuremath{L^{\cB}}}
+\newcommand{\LMA}{\ensuremath{L_{\mathrm{MA}}}}
+\newcommand{\LPA}{\ensuremath{L_{\mathrm{PA}}}}
+\newcommand{\LMMA}{\ensuremath{L_{\mathrm{mMA}}}}
+\newcommand{\Lint}{\ensuremath{L^{\textstyle\int}}}
+\newcommand{\tLint}{\ensuremath{\tilde{L}^{\textstyle\int}}}
+\newcommand{\LRN}{\ensuremath{L_{\mathrm{RN}}}}
+\newcommand{\LRNs}{\ensuremath{\LRN^{\mathrm{SA}}}}
+\newcommand{\LRV}{\ensuremath{L_{\mathrm{RV}}}}
+\newcommand{\LBM}{\ensuremath{\Brack{L}}}
+\newcommand{\LPr}{\ensuremath{L_{\mathrm{Pr}}}}
+\newcommand{\LPS}{\ensuremath{L_{\mathrm{PS}}}}
+
+% ── Boolean algebra families ─────────────────────────────────────────────────
+%
+% \cB-subscripted families arising in Ramsey/Functional Analysis.
+
+\newcommand{\BAC}{\ensuremath{\cB_{\mathrm{AC}}}}
+\newcommand{\Bb}{\ensuremath{\cB_{<\infty}}}
+\newcommand{\BFS}{\ensuremath{\cB_{\sigma}}}
+\newcommand{\BSp}{\ensuremath{\cB_{\mathrm{Simp}}}}
+\newcommand{\BSg}{\ensuremath{\cB_{\mathrm{Sg}}}}
+\newcommand{\BSI}{\ensuremath{\cB_{\infty}}}
+\newcommand{\BSt}{\ensuremath{\cB_{\mathrm{St}}}}
+\newcommand{\Bo}{\ensuremath{\cB_{0}}}
+% \Bw uses \sinewave from svrsymbols; define only if that package is loaded:
+\providecommand{\Bw}{\ensuremath{\cB_{w}}}
+
+% ── Bracket-boxed structure notation ─────────────────────────────────────────
+%
+% Used for the "bracketed language" or "bracketed structure" in Ramsey context.
+
+\newcommand{\BfM}{\Brack{\fM}}
+\newcommand{\BcM}{\Brack{\cM}}
+\newcommand{\BM}{\Brack{M}}
+\newcommand{\BMb}{\Brack{\cM_{\bullet}}}
+\newcommand{\SM}{\Sigma^{\MM}}
+\newcommand{\cMb}{\cM_{\bullet}}
+\newcommand{\Mb}{M_{\bullet}}
+\newcommand{\fMb}{\fM_{\bullet}}
+
+% ── Theorem-name references (Ramsey manuscripts) ─────────────────────────────
+%
+% These use the \mathrm{Th} form consistently across ProbabilityModels and
+% Numakuras_Lemma.  Note: \Th is \DeclareMathOperator in di-structures.sty;
+% for \ThXXX we use \mathrm{Th} directly to avoid operator spacing.
+
+\newcommand{\ThBO}{\ensuremath{\mathrm{Th}_{\cB}^{\phi}}}
+\newcommand{\ThInt}{\ensuremath{\mathrm{Th}^{\textstyle\int}}}
+\newcommand{\ThMMA}{\ensuremath{\mathrm{Th}_{\mathrm{MMA}}}}
+\newcommand{\ThOr}{\ensuremath{\mathrm{Th}^{\phi}}}
+\newcommand{\ThRM}{\ensuremath{\mathrm{Th}_{\cR}(\fM)}}
+\newcommand{\ThRN}{\ensuremath{\mathrm{Th}_{\mathrm{RN}}}}
+\newcommand{\ThRNs}{\ensuremath{\ThRN^{\mathrm{SA}}}}
+
+% ── Measure / norm families arising in Ramsey ─────────────────────────────────
+
+\newcommand{\FM}{\ensuremath{\Phi_{M}}}
+\newcommand{\LM}{\ensuremath{\Lambda_{M}}}
+
+% ── Miscellaneous combinatorics ───────────────────────────────────────────────
+
+\newcommand{\Dtwo}{\ensuremath{\Delta_{2}}}   % papers use \Delta_2 not \mathfrak{D}_2
+\newcommand{\IN}{\mathbb{N}}                   % alias (used in some papers)

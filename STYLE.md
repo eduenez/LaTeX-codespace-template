@@ -11,6 +11,37 @@ the build (see [README.md](README.md)). The *only* hard gates are the banned
 patterns below (`$$`, `\eqnarray`), which CI rejects because they degrade the
 output. Everything else is a norm, not a wall.
 
+## The style file and the vendored `_packages/`
+
+**All `\usepackage`, macros, and `\newtheorem` go in the project style file
+`<master>.sty`, never in the master `.tex`.** Each master `.tex`
+(`article-template.tex`, `monograph-template.tex`) carries only
+`\documentclass`, one `\usepackage{<master>}`, and semantic metadata
+(title/author/date/subjclass/keywords). Everything else — package loads, macro
+definitions, theorem environments, and (for the monograph) the memoir page
+layout — lives in the matching `<master>.sty` beside it. Put your project's own
+additions in that file's **"Project-specific additions"** section.
+
+`<master>.sty` first loads the **shared** packages, which are *vendored* into
+`_packages/`: pristine, byte-for-byte copies of the `di-*.sty` files from the
+[`LaTeX-shared-files`](https://github.com/eduenez/LaTeX-shared-files) repo, each
+pinned to a commit hash in `_packages/vendor.lock` and mirrored in a
+`%%% Vendored: repo/file @hash` comment above its `\usepackage`. `article-template.sty`
+loads `di-base-article` (amsart, section-scoped numbering); `monograph-template.sty`
+loads `di-base-monograph` (memoir, chapter-scoped numbering + `axiom`); both class
+bases pull in `di-base-core` (fonts, package loads, hyperref/cleveref, the theorem
+family), and `di-structures` carries shared real-valued-logic notation.
+`_packages/` is on `TEXINPUTS` (via `.latexmkrc`), so the loads are plain
+`\usepackage{di-base-article}`.
+
+This is a **"poor man's submodule"**: clone and build with no `git submodule`
+steps. **Never edit the files in `_packages/`** (see
+`_packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md`) — any edit is overwritten on
+the next re-sync and breaks the clean-diff guarantee. If a *shared* macro or
+package should change, change it upstream in `LaTeX-shared-files` and re-vendor;
+ask the maintainer (Eduardo). Files vendored but unused are kept with their
+`\usepackage` commented out, ready to activate.
+
 ## 1. Semantic line wrapping (one unit per line)
 
 Start a new source line after **each sentence** and after each semicolon/colon
@@ -28,7 +59,7 @@ Widget theory was initiated by Doe~\cite{Doe:2020}. The main theorem characteriz
 **Why?** Git diffs line by line. Editing one word in a paragraph-long line marks
 the *entire* paragraph as changed, wrecking review and conflict resolution.
 
-`make wrap` (via `scripts/texwrap.py`) breaks at sentence ends and `;`/`:`
+`make wrap` (via `_scripts/texwrap.py`) breaks at sentence ends and `;`/`:`
 clauses regardless of length. The width knob (`--cols`, default 256) only
 governs the *last-resort* hard-break of a single over-long sentence — it is
 **not** a hard column limit.
@@ -194,7 +225,12 @@ Example: `\label{thm:main-result}` → `\cref{thm:main-result}`.
 
 ## 8. Bibliography (BibTeX)
 
-- One bibliography file: `references.bib` at the repo root.
+- One bibliography file: `references.bib` at the repo root (not in `_packages/`).
+  It is **vendored-but-editable**: a synced snapshot of the group's master
+  `math-bibliography` database, pinned in `_packages/vendor.lock` to record the
+  last sync point. Unlike the `.sty` files in `_packages/`, you **may** edit this
+  one — add citations directly; the maintainer periodically reconciles them back
+  into the master.
 - Entry keys follow `AuthorLastName:YYYY` or `AuthorOne-AuthorTwo:YYYY`.
 - Cite with `\cite{key}` (use a non-breaking space before it: `Doe~\cite{Doe:2020}`).
 - The bibliography is typeset by `\bibliographystyle{alpha}` + `\bibliography{references}`
@@ -206,7 +242,9 @@ Example: `\label{thm:main-result}` → `\cref{thm:main-result}`.
 
 - `\cref{...}` auto-generates "Theorem 2.1", "Section 3", …; `\Cref{...}` at the
   start of a sentence. Never hardcode "Theorem \ref{...}".
-- Define macros for repeated notation in the preamble:
+- Define macros for repeated notation in the project style file `<master>.sty`
+  (its "Project-specific additions" section) — never in the master `.tex`. See
+  "The style file and the vendored `_packages/`" above.
 
 ```latex
 \newcommand{\RR}{\mathbb{R}}
@@ -229,12 +267,12 @@ which is what lets them compose cleanly:
 
 | target | tool | what it owns |
 |---|---|---|
-| `make fashion` | `scripts/texfashion.py` | typography: accents → Unicode, curly quotes, tabs → spaces (text only) |
-| `make wrap` | `scripts/texwrap.py` | **where** line breaks fall (semantic, math-aware); touches no whitespace |
+| `make fashion` | `_scripts/texfashion.py` | typography: accents → Unicode, curly quotes, tabs → spaces (text only) |
+| `make wrap` | `_scripts/texwrap.py` | **where** line breaks fall (semantic, math-aware); touches no whitespace |
 | `make indent` | `latexindent` | **all** whitespace: 2-space indentation, blank-line runs → one, no trailing whitespace |
 | `make reflow` | wrap → indent | re-flow: breaks, then whitespace |
 | `make format` | fashion → reflow | do it all |
-| `make sep` | `scripts/texsep.py` | sectioning banners (§4); opt-in, *not* part of `make format` |
+| `make sep` | `_scripts/texsep.py` | sectioning banners (§4); opt-in, *not* part of `make format` |
 | `make check` | fashion + wrap | dry run: report what would change, altering nothing |
 
 Two properties to rely on:

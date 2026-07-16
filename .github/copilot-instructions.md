@@ -9,8 +9,17 @@ project keeps one and deletes the other):
 - **monograph-template.tex** — a book/monograph using the `memoir` document class
 - **article-template.tex** — a research paper using the `amsart` document class
 
+Each master `.tex` carries only `\documentclass`, one `\usepackage{<master>}`,
+and semantic metadata. All `\usepackage`, macros, and `\newtheorem` live in the
+project style file `<master>.sty` (`article-template.sty` /
+`monograph-template.sty`), which loads the shared `di-*` packages **vendored** in
+`_packages/` — pristine copies pinned in `_packages/vendor.lock`. Never edit files
+in `_packages/` (see `_packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md`); change
+shared code upstream in `LaTeX-shared-files` and re-vendor.
+
 Engine: **pdfLaTeX + STIX Two** fonts. Bibliography: **BibTeX** (a single root
-`references.bib`, style `alpha`). See `STYLE.md` for the full conventions.
+`references.bib`, style `alpha`), vendored-but-editable (add citations directly).
+See `STYLE.md` for the full conventions.
 
 ## LaTeX Conventions
 
@@ -33,18 +42,20 @@ Engine: **pdfLaTeX + STIX Two** fonts. Bibliography: **BibTeX** (a single root
 - Use semantic commands (`\RR`, `\norm{x}`) instead of raw LaTeX (`\mathbb{R}`, `\|x\|`).
 
 ### Environments
-Use the theorem-like environments defined in each template's preamble:
-`theorem`, `lemma`, `proposition`, `corollary`, `conjecture`, `definition`, `example`, `exercise`, `remark`, `notation`.
+Use the theorem-like environments defined in the project `.sty` (which loads the
+vendored shared packages): `theorem`, `lemma`, `proposition`, `corollary`,
+`conjecture`, `definition`, `example`, `exercise`, `remark`, `notation`.
 
 ### Collaboration
 - Use `\todo{...}` for notes and reminders (todonotes package).
 - Use `\cite{key}` for citations (BibTeX); prefer a non-breaking space before it
   (`Doe~\cite{Doe:2020}`). The bibliography is `\bibliographystyle{alpha}` +
   `\bibliography{references}` at the end of the main file.
-- Define macros in the preamble for repeated notation.
+- Define macros for repeated notation in the project `.sty` (which loads the
+  vendored shared packages), never in the master `.tex`.
 
 ## Build
 - Compile with `latexmk` (configured for pdfLaTeX via `.latexmkrc`).
-- The finished PDF lands at the repo root; intermediates go to `build/` — never
-  edit or reference the `build/` files.
+- The finished PDF lands at the repo root; intermediates go to `_build/` — never
+  edit or reference the `_build/` files.
 - Use `make build` from the repository root (builds every main document).

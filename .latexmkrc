@@ -4,15 +4,20 @@
 #
 # Output layout: the PDF (the product) lands next to the source at the repo
 # root; all intermediate files (.aux, .log, .fls, .fdb_latexmk, .bbl, .out, …)
-# are tucked into build/ (the "working directory"). This is the
+# are tucked into _build/ (the "working directory"). This is the
 # $aux_dir/$out_dir split — latexmk moves the final PDF from the aux dir back
-# to $out_dir. build/ and the root *.pdf are both gitignored.
+# to $out_dir. _build/ and the root *.pdf are both gitignored.
 #
 # NOTE: this governs latexmk only. A manual `pdflatex; bibtex; pdflatex`
 # sequence ignores this file and writes everything to the current directory —
 # that still works; it just leaves the intermediates at the root.
 
-$aux_dir = 'build';
+# The vendored shared packages (di-base-core, di-base-article,
+# di-base-monograph, …) live in _packages/; add it to TEXINPUTS so
+# \usepackage{di-base-article} etc. resolve without a path prefix.
+ensure_path('TEXINPUTS', './_packages//');
+
+$aux_dir = '_build';
 $out_dir = '.';
 
 $pdf_mode = 1;   # pdflatex → PDF
