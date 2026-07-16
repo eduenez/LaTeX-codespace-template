@@ -7,7 +7,7 @@
 #
 # Targets:
 #   make                 – show help
-#   make build           – build every main document (auto-discovered)
+#   make article         – build every main document (auto-discovered)
 #   make format          – do it all: fashion + reflow (idempotent)
 #   make reflow          – wrap + indent (idempotent re-flow)
 #   make fashion         – modernize typography (accents, quotes, tabs)
@@ -25,7 +25,7 @@ TEX_SRC := $(wildcard *.tex)
 # Main documents = files that contain \documentclass.
 MAIN_SRC := $(shell grep -l '\\documentclass' $(TEX_SRC) 2>/dev/null)
 
-.PHONY: all help build article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(MAIN_SRC) $(MAIN_SRC:.tex=)
+.PHONY: all help article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(MAIN_SRC) $(MAIN_SRC:.tex=)
 
 all: help
 
@@ -34,8 +34,8 @@ help:
 	@echo "LaTeX Project — Makefile Targets"
 	@echo ""
 	@echo "  Building:"
-	@echo "    make build           Build every main document (pdfLaTeX via latexmk)"
-	@echo "                         synonyms: article, pdf, PDF, compile"
+	@echo "    make article         Build every main document (pdfLaTeX via latexmk)"
+	@echo "                         synonyms: pdf, PDF, compile"
 	@echo "    make <name>          Build one document by name, e.g. make $(firstword $(MAIN_SRC:.tex=))"
 	@echo ""
 	@echo "  Formatting:"
@@ -54,9 +54,9 @@ help:
 	@echo ""
 	@echo "  Main documents detected: $(MAIN_SRC)"
 
-## build: Build every main document.  Synonyms (same effect): article, pdf,
-## PDF, compile — so authors can type whichever reads naturally.
-build article pdf PDF compile:
+## article: Build every main document.  Synonyms (same effect): pdf, PDF,
+## compile — so authors can type whichever reads naturally.
+article pdf PDF compile:
 	@if [ -z "$(MAIN_SRC)" ]; then echo "No main .tex (with \\documentclass) found."; exit 1; fi
 	@for f in $(MAIN_SRC); do \
 	  echo "── Building $$f ──"; \

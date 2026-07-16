@@ -58,4 +58,4 @@ vendored shared packages): `theorem`, `lemma`, `proposition`, `corollary`,
 - Compile with `latexmk` (configured for pdfLaTeX via `.latexmkrc`).
 - The finished PDF lands at the repo root; intermediates go to `_build/` — never
   edit or reference the `_build/` files.
-- Use `make build` from the repository root (builds every main document).
+- Use `make article` from the repository root (builds every main document).

@@ -61,7 +61,7 @@ real-valued-logic notation.
    `git mv article-template.tex myproject.tex`,
    `git mv article-template.sty myproject.sty`, then change
    `\usepackage{article-template}` to `\usepackage{myproject}`). Start writing;
-   build with `make build`.
+   build with `make article`.
 
 Both masters (and their `.sty` files) coexist at the root until you delete one —
 nothing is buried in a subdirectory. The vendored shared packages sit in
@@ -110,7 +110,7 @@ the finished **PDF lands at the repo root** next to the source. Both are
 gitignored.
 
 ```bash
-make build                 # build every "main" .tex (one with \documentclass)
+make article                 # build every "main" .tex (one with \documentclass)
 latexmk article-template   # or build a single document directly
 ```
 
