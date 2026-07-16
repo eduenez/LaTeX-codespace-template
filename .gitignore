@@ -8,7 +8,7 @@
 *.swo
 
 # ── Build output directory ───────────────────────────────────────────────────
-build/
+_build/
 
 # ── Core LaTeX auxiliary files ───────────────────────────────────────────────
 *.aux

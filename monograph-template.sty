@@ -1,8 +1,8 @@
 %% monograph-template.sty — project style file for monograph-template.tex (memoir)
 %%
 %% This is the SOLE package loaded by monograph-template.tex. It (1) loads the
-%% shared preamble packages vendored in packages/ (pristine copies pinned in
-%% packages/vendor.lock — DO NOT edit them there), then (2) defines everything
+%% shared preamble packages vendored in _packages/ (pristine copies pinned in
+%% _packages/vendor.lock — DO NOT edit them there), then (2) defines everything
 %% specific to this monograph in the "Project-specific additions" section
 %% (including the memoir page layout — only \documentclass and semantic
 %% metadata belong in the .tex).
@@ -19,17 +19,17 @@
 \ProvidesPackage{monograph-template}[2026/07/15 monograph-template project preamble]
 
 % ═══════════════════════════════════════════════════════════════════════════
-%% Vendored shared packages  (pristine copies in packages/; DO NOT edit there)
+%% Vendored shared packages  (pristine copies in _packages/; DO NOT edit there)
 % ═══════════════════════════════════════════════════════════════════════════
 % di-base-monograph \RequirePackage{di-base-core} internally, so di-base-core.sty
-% must be vendored alongside it (it is; pinned in packages/vendor.lock).
+% must be vendored alongside it (it is; pinned in _packages/vendor.lock).
 
 %%% Vendored: eduenez/LaTeX-shared-files/di-base-monograph.sty @ af98e4f
 %%%           (pulls in di-base-core.sty @ af98e4f)
 \usepackage{di-base-monograph}
 
 % Available but not used by this template (uncomment to activate; copies live
-% in packages/ and are pinned in packages/vendor.lock):
+% in _packages/ and are pinned in _packages/vendor.lock):
 %%% Vendored: eduenez/LaTeX-shared-files/di-structures.sty @ af98e4f
 % \usepackage{di-structures}   % real-valued-logic notation
 %%% Vendored: eduenez/LaTeX-shared-files/di-ramsey.sty @ af98e4f

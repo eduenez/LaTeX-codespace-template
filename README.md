@@ -10,12 +10,12 @@ plus a fully configured Codespace for cloud editing in VS Code.
 - **Preamble:** each master `.tex` carries only `\documentclass`, one
   `\usepackage{<master>}`, and semantic metadata (title/author/date/…); every
   `\usepackage`, macro, and `\newtheorem` lives in that project style file
-  `<master>.sty`, which loads the shared packages **vendored** in `packages/`.
+  `<master>.sty`, which loads the shared packages **vendored** in `_packages/`.
 - **Bibliography:** BibTeX (a single root `references.bib`), style `alpha` —
   vendored-but-editable (see below).
 - **Checks:** advisory — they guide, they don't block (see below).
 
-## The master / `.sty` split and the vendored `packages/`
+## The master / `.sty` split and the vendored `_packages/`
 
 Each starting point is a **pair**: a master `.tex` and a project style file
 `<master>.sty` beside it. The master `.tex` holds only `\documentclass`, a single
@@ -26,15 +26,15 @@ their own: `article-template.tex` → `article-template.sty` (loads
 (loads `di-base-monograph`).
 
 Those `di-*` files are **shared** style files that are *vendored* into
-`packages/`: pristine, byte-for-byte copies of the originals in the
+`_packages/`: pristine, byte-for-byte copies of the originals in the
 [`LaTeX-shared-files`](https://github.com/eduenez/LaTeX-shared-files) repo, each
-pinned to a commit hash in [`packages/vendor.lock`](packages/vendor.lock) and
+pinned to a commit hash in [`_packages/vendor.lock`](_packages/vendor.lock) and
 mirrored in a `%%% Vendored: repo/file @hash` comment above its `\usepackage`.
 This is a **"poor man's submodule"**: clone and build immediately, with no
 `git submodule` steps. The rule (spelled out in
-[`packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md`](packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md))
-is **never edit the files in `packages/`** — change shared code upstream in
-`LaTeX-shared-files` and re-vendor. `packages/` is on `TEXINPUTS` (via
+[`_packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md`](_packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md))
+is **never edit the files in `_packages/`** — change shared code upstream in
+`LaTeX-shared-files` and re-vendor. `_packages/` is on `TEXINPUTS` (via
 `.latexmkrc`), so the loads are plain `\usepackage{di-base-article}` with no path
 prefix. Files vendored but unused are kept with their `\usepackage` commented out,
 ready to activate.
@@ -65,7 +65,7 @@ real-valued-logic notation.
 
 Both masters (and their `.sty` files) coexist at the root until you delete one —
 nothing is buried in a subdirectory. The vendored shared packages sit in
-`packages/`; leave them as they are.
+`_packages/`; leave them as they are.
 
 ## Repository structure
 
@@ -76,7 +76,7 @@ nothing is buried in a subdirectory. The vendored shared packages sit in
 ├── .github/workflows/
 │   └── lint-and-build.yml    # CI: advisory lint + build PDFs
 ├── .gitignore
-├── .latexmkrc                # pdfLaTeX; aux → build/, PDF → repo root; packages/ on TEXINPUTS
+├── .latexmkrc                # pdfLaTeX; aux → _build/, PDF → repo root; _packages/ on TEXINPUTS
 ├── .vscode/settings.json
 ├── article-template.tex      # research-article master (amsart): \documentclass + metadata only
 ├── article-template.sty      #   its style file: loads di-base-article + project additions
@@ -86,7 +86,7 @@ nothing is buried in a subdirectory. The vendored shared packages sit in
 ├── monograph-template-2-background.tex
 ├── monograph-template-3-main-results.tex
 ├── monograph-template-4-conclusion.tex
-├── packages/                 # vendored shared style files ("poor man's submodule")
+├── _packages/                 # vendored shared style files ("poor man's submodule")
 │   ├── _DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md   # the never-edit rule
 │   ├── vendor.lock           # provenance pins: <file> <upstream repo> <commit>
 │   ├── di-base-core.sty      # class-agnostic core (fonts, packages, cleveref, theorems)
@@ -96,7 +96,7 @@ nothing is buried in a subdirectory. The vendored shared packages sit in
 ├── references.bib            # the single bibliography (BibTeX), vendored-but-editable
 ├── latexindent.yaml
 ├── Makefile
-├── scripts/
+├── _scripts/
 │   ├── setup-hooks.sh        # installs the advisory pre-commit hook
 │   └── texwrap.py            # semantic line-wrapper
 ├── STYLE.md                  # writing conventions
@@ -105,7 +105,7 @@ nothing is buried in a subdirectory. The vendored shared packages sit in
 
 ## Building
 
-pdfLaTeX via `latexmk`. Intermediates (`.aux`, `.log`, `.bbl`, …) go to `build/`;
+pdfLaTeX via `latexmk`. Intermediates (`.aux`, `.log`, `.bbl`, …) go to `_build/`;
 the finished **PDF lands at the repo root** next to the source. Both are
 gitignored.
 
@@ -131,15 +131,15 @@ make check     # dry-run: what isn't wrapped
 ## Bibliography workflow
 
 [`references.bib`](references.bib) lives at the repo **root** (not in
-`packages/`) and is **vendored-but-editable**: it is a synced snapshot of the
+`_packages/`) and is **vendored-but-editable**: it is a synced snapshot of the
 group's master database,
 [`math-bibliography`](https://github.com/eduenez/math-bibliography), pinned in
-[`packages/vendor.lock`](packages/vendor.lock) to record the last sync point. The
+[`_packages/vendor.lock`](_packages/vendor.lock) to record the last sync point. The
 master is the **canonical source of truth**: it is kept tidied (`bibtex-tidy`) and
 **sorted case-insensitively by key**, so any copy taken from it is already clean
 and sorted.
 
-Unlike the `.sty` files in `packages/`, this one file you **may edit** —
+Unlike the `.sty` files in `_packages/`, this one file you **may edit** —
 collaborators add citations to it directly; the maintainer periodically
 reconciles those additions back into the master. The workflow:
 
@@ -167,7 +167,7 @@ This template deliberately does **not** block collaborators on formatting:
   `$$`/`\eqnarray`) then **always lets the commit through**. It's installed to
   your clone's `.git/hooks/` by the Codespace `postCreateCommand`, or manually:
   ```bash
-  make install-hooks     # (= bash scripts/setup-hooks.sh)
+  make install-hooks     # (= bash _scripts/setup-hooks.sh)
   ```
   The hook lives in `.git/hooks/` and is **not** updated by `git pull` — re-run
   the command above to refresh it.

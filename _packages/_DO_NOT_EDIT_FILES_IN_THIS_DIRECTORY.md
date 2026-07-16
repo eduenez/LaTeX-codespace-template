@@ -25,7 +25,7 @@ sync can diff them cleanly.
 - `article-template.sty` loads `di-base-article` (amsart, section-scoped numbering).
 - `monograph-template.sty` loads `di-base-monograph` (memoir, chapter-scoped numbering).
 
-Both `\RequirePackage{di-base-core}` internally. `packages/` is on `TEXINPUTS`
+Both `\RequirePackage{di-base-core}` internally. `_packages/` is on `TEXINPUTS`
 (see `../.latexmkrc`), so no path prefix is needed. Files present but **not**
 loaded (their `\usepackage` line commented out in a project `.sty`) are kept here
 only for convenient future activation — this is the pattern a new project copied

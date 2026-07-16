@@ -1,8 +1,8 @@
 %% article-template.sty — project style file for article-template.tex (amsart)
 %%
 %% This is the SOLE package loaded by article-template.tex. It (1) loads the
-%% shared preamble packages vendored in packages/ (pristine copies pinned in
-%% packages/vendor.lock — DO NOT edit them there), then (2) defines everything
+%% shared preamble packages vendored in _packages/ (pristine copies pinned in
+%% _packages/vendor.lock — DO NOT edit them there), then (2) defines everything
 %% specific to this paper in the "Project-specific additions" section.
 %%
 %% When you start a real paper from this template, rename this file to match
@@ -17,17 +17,17 @@
 \ProvidesPackage{article-template}[2026/07/15 article-template project preamble]
 
 % ═══════════════════════════════════════════════════════════════════════════
-%% Vendored shared packages  (pristine copies in packages/; DO NOT edit there)
+%% Vendored shared packages  (pristine copies in _packages/; DO NOT edit there)
 % ═══════════════════════════════════════════════════════════════════════════
 % di-base-article \RequirePackage{di-base-core} internally, so di-base-core.sty
-% must be vendored alongside it (it is; pinned in packages/vendor.lock).
+% must be vendored alongside it (it is; pinned in _packages/vendor.lock).
 
 %%% Vendored: eduenez/LaTeX-shared-files/di-base-article.sty @ af98e4f
 %%%           (pulls in di-base-core.sty @ af98e4f)
 \usepackage{di-base-article}
 
 % Available but not used by this template (uncomment to activate; copies live
-% in packages/ and are pinned in packages/vendor.lock). This is the pattern for
+% in _packages/ and are pinned in _packages/vendor.lock). This is the pattern for
 % a real project: vendor the shared files you want, comment out the rest.
 %%% Vendored: eduenez/LaTeX-shared-files/di-structures.sty @ af98e4f
 % \usepackage{di-structures}   % real-valued-logic notation

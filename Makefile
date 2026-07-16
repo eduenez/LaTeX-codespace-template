@@ -2,7 +2,7 @@
 #
 # Flat layout: all .tex files live at the repo root. "Main" documents are the
 # ones containing \documentclass; chapter files \include'd by a monograph are
-# not built directly. latexmk (via .latexmkrc) puts intermediates in build/
+# not built directly. latexmk (via .latexmkrc) puts intermediates in _build/
 # and the finished PDF at the repo root.
 #
 # Targets:
@@ -16,7 +16,7 @@
 #   make sep             – normalize sectioning banners (advisory)
 #   make check           – dry-run: report .tex needing fashion/wrapping
 #   make lint            – run chktex on all .tex
-#   make clean           – remove build/ and stray auxiliaries
+#   make clean           – remove _build/ and stray auxiliaries
 #   make install-hooks   – install the advisory git pre-commit hook
 #   make help            – show this help
 
@@ -49,7 +49,7 @@ help:
 	@echo ""
 	@echo "  Linting & cleaning:"
 	@echo "    make lint            Run chktex on all .tex"
-	@echo "    make clean           Remove build/ and stray auxiliaries"
+	@echo "    make clean           Remove _build/ and stray auxiliaries"
 	@echo "    make install-hooks   Install the advisory git pre-commit hook"
 	@echo ""
 	@echo "  Main documents detected: $(MAIN_SRC)"
@@ -82,11 +82,11 @@ reflow:
 
 ## fashion: Modernize typography (accents -> Unicode, curly quotes, tabs -> spaces)
 fashion:
-	python3 scripts/texfashion.py $(TEX_SRC)
+	python3 _scripts/texfashion.py $(TEX_SRC)
 
 ## wrap: Semantic line-wrapping (break positions only; whitespace-preserving)
 wrap:
-	python3 scripts/texwrap.py --cols $(COLS) $(TEX_SRC)
+	python3 _scripts/texwrap.py --cols $(COLS) $(TEX_SRC)
 
 ## indent: Whitespace normalization (latexindent). -m enables blank-line
 ## condensing; with this config it makes no other line-break changes.
@@ -98,13 +98,13 @@ indent:
 
 ## sep: Normalize sectioning banners (STYLE.md; advisory, comment-only)
 sep:
-	python3 scripts/texsep.py $(TEX_SRC)
+	python3 _scripts/texsep.py $(TEX_SRC)
 
 ## check: Report .tex needing fashion/wrapping (no changes; latexindent has no dry-run)
 check:
 	@rc=0; \
-	python3 scripts/texfashion.py --check $(TEX_SRC) || rc=1; \
-	python3 scripts/texwrap.py --check --cols $(COLS) $(TEX_SRC) || rc=1; \
+	python3 _scripts/texfashion.py --check $(TEX_SRC) || rc=1; \
+	python3 _scripts/texwrap.py --check --cols $(COLS) $(TEX_SRC) || rc=1; \
 	exit $$rc
 
 ## lint: Run chktex on all .tex
@@ -116,10 +116,10 @@ lint:
 
 ## clean: Remove build artifacts
 clean:
-	rm -rf build
+	rm -rf _build
 	rm -f *.bak[0-9] *.bak[0-9][0-9] indent.log
 	rm -f *.aux *.log *.out *.toc *.fls *.fdb_latexmk *.bbl *.blg *.synctex.gz
 
 ## install-hooks: Install the advisory git pre-commit hook
 install-hooks:
-	bash scripts/setup-hooks.sh
+	bash _scripts/setup-hooks.sh

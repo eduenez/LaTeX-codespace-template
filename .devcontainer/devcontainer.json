@@ -5,7 +5,7 @@
     "runServices": ["vscode"],
     "shutdownAction": "stopCompose",
     "workspaceFolder": "/workspace",
-    "postCreateCommand": "bash /workspace/scripts/setup-hooks.sh",
+    "postCreateCommand": "bash /workspace/_scripts/setup-hooks.sh",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -48,7 +48,7 @@
                     "editor.defaultFormatter": "James-Yu.latex-workshop"
                 },
                 "latex-workshop.latex.autoBuild.run": "onSave",
-                // The PDF lands at the repo root; intermediates go to build/
+                // The PDF lands at the repo root; intermediates go to _build/
                 // (both governed by .latexmkrc). Let latexmk read .latexmkrc
                 // rather than forcing -outdir here.
                 "latex-workshop.latex.outDir": "%DIR%",
