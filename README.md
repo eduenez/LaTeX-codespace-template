@@ -49,7 +49,8 @@ real-valued-logic notation.
 ## Quick start
 
 1. Click **"Use this template"** on GitHub to create your repository.
-2. Open it in a **GitHub Codespace** (or clone locally).
+2. Open it in a **GitHub Codespace** (or clone locally — see
+   [Local setup](#local-setup-macos-and-ubuntu) below for the required software).
 3. Pick one starting point and delete the other (each master comes with its own
    `.sty`):
    - keeping the **article**: delete `monograph-template.tex`,
@@ -67,6 +68,103 @@ Both masters (and their `.sty` files) coexist at the root until you delete one �
 nothing is buried in a subdirectory. The vendored shared packages sit in
 `_packages/`; leave them as they are.
 
+## Local setup (macOS and Ubuntu)
+
+The Codespace / Dev Container ([.devcontainer/Dockerfile](.devcontainer/Dockerfile))
+already has all of this installed. If you're cloning locally instead, you need:
+
+- A **TeX Live** distribution providing `pdflatex`, `latexmk`, `bibtex`,
+  `chktex`, and `latexindent`, plus the **STIX Two** fonts (`stix2` package).
+- **Perl modules** for `latexindent`: `Log::Log4perl`, `Log::Dispatch::File`,
+  `YAML::Tiny`, `File::HomeDir`, `Unicode::GCString`.
+- **Python 3** (stdlib only — no packages to install) for the `make
+  wrap`/`fashion`/`sep`/`check` scripts in [`_scripts/`](_scripts/).
+- **`make`** and **`git`**.
+
+### macOS (Homebrew)
+
+```bash
+# Full TeX Live (a few GB; includes latexmk, chktex, latexindent, STIX Two).
+# mactex-no-gui skips the GUI front-ends (TeXShop, etc.) — add --cask mactex
+# instead if you want those too.
+brew install --cask mactex-no-gui
+
+# make and python3 usually already exist via the Xcode Command Line Tools
+# (xcode-select --install); this covers a bare Homebrew setup too.
+brew install make python3 cpanminus
+
+# Perl modules latexindent needs.
+cpanm --notest Log::Log4perl Log::Dispatch::File YAML::Tiny File::HomeDir Unicode::GCString
+```
+
+MacTeX installs its binaries to `/Library/TeX/texbin` and adds that to your
+`PATH` via `/etc/paths.d` — open a **new terminal tab** afterwards so it takes
+effect.
+
+### Ubuntu / Debian
+
+```bash
+sudo apt-get update
+# texlive-full guarantees chktex, latexindent, and the STIX Two fonts are all
+# present; if you'd rather avoid the ~5 GB download, texlive-latex-extra +
+# texlive-fonts-extra + texlive-bibtex-extra + chktex + latexmk covers this
+# template, but texlive-full is the safest default.
+sudo apt-get install -y texlive-full git fontconfig make python3 python3-pip cpanminus
+
+sudo cpanm --notest Log::Log4perl Log::Dispatch::File YAML::Tiny File::HomeDir Unicode::GCString
+sudo fc-cache -fv
+```
+
+### Verify
+
+```bash
+latexmk -v && chktex --version && latexindent --version && python3 --version && make --version
+```
+
+Then, from the repo root:
+
+```bash
+make install-hooks   # advisory pre-commit hook (see below)
+make build           # compile the template(s) end to end
+```
+
+## Editor setup (VS Code)
+
+Opening the repo folder in VS Code (Codespace **or** a local clone) prompts you
+to install the recommended extensions from
+[`.vscode/extensions.json`](.vscode/extensions.json) — accept the prompt, or
+install them yourself:
+
+```bash
+code --install-extension james-yu.latex-workshop
+code --install-extension eamodio.gitlens
+code --install-extension GitHub.copilot
+code --install-extension GitHub.copilot-chat
+code --install-extension GitHub.vscode-pull-request-github
+code --install-extension shardulm94.trailing-spaces
+code --install-extension stkb.rewrap
+code --install-extension streetsidesoftware.code-spell-checker
+code --install-extension yzhang.markdown-all-in-one
+code --install-extension redhat.vscode-yaml
+```
+
+[`.vscode/settings.json`](.vscode/settings.json) then wires up
+[LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)
+to this template's toolchain — no per-user configuration needed:
+
+- **Build on save**, via `latexmk` and `.latexmkrc` (PDF at the repo root,
+  intermediates in `_build/`).
+- **PDF preview** opens in an editor tab with SyncTeX (click in the PDF to
+  jump to source, and back).
+- **`chktex` linting** as you type, and **`latexindent`** (via
+  `latexindent.yaml`) as the `[latex]` format-on-save formatter.
+- **Word count** (`texcount`, from the `latex-utilities` extension) and a
+  **spell checker** scoped to `latex`/`bibtex` files.
+
+Only `latexmk`, `chktex`, `latexindent`, and `texcount` need to be on your
+`PATH` for these to work — see [Local setup](#local-setup-macos-and-ubuntu)
+above.
+
 ## Repository structure
 
 ```
@@ -77,7 +175,9 @@ nothing is buried in a subdirectory. The vendored shared packages sit in
 │   └── lint-and-build.yml    # CI: advisory lint + build PDFs
 ├── .gitignore
 ├── .latexmkrc                # pdfLaTeX; aux → _build/, PDF → repo root; _packages/ on TEXINPUTS
-├── .vscode/settings.json
+├── .vscode/
+│   ├── settings.json          # LaTeX Workshop, chktex, latexindent, spell-check wiring
+│   └── extensions.json        # recommended-extensions prompt (Codespace + local)
 ├── article-template.tex      # research-article master (amsart): \documentclass + metadata only
 ├── article-template.sty      #   its style file: loads di-base-article + project additions
 ├── monograph-template.tex    # monograph master (memoir): \documentclass + metadata only

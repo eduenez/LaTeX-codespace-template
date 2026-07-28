@@ -18,6 +18,7 @@
     "[latex]": {
         "editor.defaultFormatter": "James-Yu.latex-workshop"
     },
+    "latex-workshop.latex.autoBuild.run": "onSave",
     "latex-workshop.latex.outDir": "%DIR%",
     "latex-workshop.latex.recipes": [
         {
@@ -55,5 +56,21 @@
         "-y=defaultIndent: '%INDENT%'"
     ],
     "editor.formatOnSave": true,
-    "makefile.configureOnOpen": false
+    "makefile.configureOnOpen": false,
+    "cSpell.language": "en",
+    "cSpell.enableFiletypes": [
+        "latex",
+        "bibtex"
+    ],
+    "github.copilot.enable": {
+        "latex": true,
+        "markdown": true,
+        "bibtex": true,
+        "plaintext": true
+    },
+    "latex-utilities.countWord.path": "texcount",
+    "latex-utilities.countWord.args": [
+        "%DOCFILE%"
+    ],
+    "latex-utilities.countWord.format": "${words} words total, ${wordsBody} in body"
 }
