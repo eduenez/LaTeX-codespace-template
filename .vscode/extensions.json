@@ -1,0 +1,20 @@
+{
+    "recommendations": [
+        // LaTeX
+        "james-yu.latex-workshop",
+        // Git
+        "eamodio.gitlens",
+        // GitHub
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "GitHub.vscode-pull-request-github",
+        // Editing helpers
+        "shardulm94.trailing-spaces",
+        "stkb.rewrap",
+        "streetsidesoftware.code-spell-checker",
+        // Markdown
+        "yzhang.markdown-all-in-one",
+        // YAML (for config files)
+        "redhat.vscode-yaml"
+    ]
+}
