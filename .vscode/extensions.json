@@ -2,6 +2,7 @@
     "recommendations": [
         // LaTeX
         "james-yu.latex-workshop",
+        "tecosaur.latex-utilities",
         // Git
         "eamodio.gitlens",
         // GitHub

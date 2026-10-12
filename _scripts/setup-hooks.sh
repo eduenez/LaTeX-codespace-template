@@ -31,7 +31,7 @@ cat > "$HOOKS_DIR/pre-commit" << 'HOOK'
 # The project's line convention is *semantic wrapping*: one sentence or
 # semicolon/colon-delimited clause per source line, produced by `make wrap`.
 # It keeps git diffs small and reviewable. The width (--cols) only governs the
-# last-resort hard-break of an over-long single sentence; see scripts/texwrap.py
+# last-resort hard-break of an over-long single sentence; see _scripts/texwrap.py
 # for the full rule set; see README.md and STYLE.md for conventions.
 #
 # Checks (all advisory):
@@ -55,9 +55,9 @@ WARN=0
 note() { WARN=1; echo "$@"; }
 
 # ── Check 1: Semantic wrapping via texwrap.py ────────────────────────────────
-if [ -f "$REPO_ROOT/scripts/texwrap.py" ]; then
+if [ -f "$REPO_ROOT/_scripts/texwrap.py" ]; then
   # shellcheck disable=SC2086
-  if ! python3 "$REPO_ROOT/scripts/texwrap.py" --check --cols 256 $STAGED_TEX >/dev/null 2>&1; then
+  if ! python3 "$REPO_ROOT/_scripts/texwrap.py" --check --cols 256 $STAGED_TEX >/dev/null 2>&1; then
     note "pre-commit [advisory]: staged .tex is not semantically wrapped."
     note "            Run 'make wrap' to normalize (one sentence/clause per line)."
   fi

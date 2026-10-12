@@ -2,71 +2,145 @@
 
 A batteries-included template for collaborative LaTeX writing, designed to be
 used as a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-template-repository).
-It ships **two starting points at the repo root** — a **monograph**
-(`memoir` class, with chapters) and a **research article** (`amsart` class) —
+**One repository hosts many papers**: every manuscript (research article,
+monograph, survey, textbook, …) lives in its own subdirectory, and all papers
+share one set of vendored style files, one bibliography, and one toolchain —
 plus a fully configured Codespace for cloud editing in VS Code.
 
 - **Engine:** pdfLaTeX + [STIX Two](https://ctan.org/pkg/stix2) fonts (text + math), via `latexmk`.
-- **Preamble:** each master `.tex` carries only `\documentclass`, one
-  `\usepackage{<master>}`, and semantic metadata (title/author/date/…); every
-  `\usepackage`, macro, and `\newtheorem` lives in that project style file
-  `<master>.sty`, which loads the shared packages **vendored** in `_packages/`.
-- **Bibliography:** BibTeX (a single root `references.bib`), style `alpha` —
-  vendored-but-editable (see below).
+- **Layout:** one subdirectory per paper; shared infrastructure in directories whose names start with `_`.
+- **Preamble:** each paper's main `.tex` carries only `\documentclass`, one
+  `\usepackage{<paper>}`, and semantic metadata; every `\usepackage`, macro, and
+  `\newtheorem` lives in the paper's style file `<paper>.sty`, which loads the
+  shared packages **vendored** in `_packages/`.
+- **Bibliography:** BibTeX, style `alpha`, from **one shared** root `references.bib`.
+- **No submodules, no symlinks:** everything works with a plain clone (including
+  on Windows). Shared files are reached by relative path (`../`).
 - **Checks:** advisory — they guide, they don't block (see below).
 
-## The master / `.sty` split and the vendored `_packages/`
+## Repository layout
 
-Each starting point is a **pair**: a master `.tex` and a project style file
-`<master>.sty` beside it. The master `.tex` holds only `\documentclass`, a single
-`\usepackage{<master>}`, and the semantic metadata; **all** packages, macros, and
-theorem/environment definitions live in `<master>.sty`. The two masters each have
-their own: `article-template.tex` → `article-template.sty` (loads
-`di-base-article`) and `monograph-template.tex` → `monograph-template.sty`
-(loads `di-base-monograph`).
+```
+.
+├── references.bib            # THE shared bibliography (vendored-but-editable)
+├── latexmkrc                 # shared latexmk configuration (non-hidden)
+├── Makefile                  # build / format / lint for all papers
+├── CLAUDE.md                 # instructions for AI agents (same rules as here)
+├── STYLE.md                  # writing conventions
+├── _packages/                # vendored shared style files — NEVER edit (see below)
+├── _scripts/                 # new-paper.sh, export-paper.sh, texwrap.py, hooks, …
+├── _templates/               # skeletons copied by `make new`
+│   ├── article/              #   amsart research article
+│   └── monograph/            #   memoir book with chapters
+├── example-article/          # a paper (one directory per manuscript)
+│   ├── example-article.tex   #   main file: \documentclass + \usepackage{example-article} + metadata
+│   ├── example-article.sty   #   ALL packages/macros for this paper; loads ../_packages/di-*.sty
+│   ├── latexmkrc             #   two lines: build this file; load ../latexmkrc
+│   └── figures/, data/, …    #   anything else belonging to this paper
+├── another-paper/            # another paper, same shape
+├── .vscode/  .devcontainer/  .github/workflows/
+└── latexindent.yaml  .chktexrc  …
+```
 
-Those `di-*` files are **shared** style files that are *vendored* into
-`_packages/`: pristine, byte-for-byte copies of the originals in the
-[`LaTeX-shared-files`](https://github.com/eduenez/LaTeX-shared-files) repo, each
-pinned to a commit hash in [`_packages/vendor.lock`](_packages/vendor.lock) and
-mirrored in a `%%% Vendored: repo/file @hash` comment above its `\usepackage`.
-This is a **"poor man's submodule"**: clone and build immediately, with no
-`git submodule` steps. The rule (spelled out in
-[`_packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md`](_packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md))
-is **never edit the files in `_packages/`** — change shared code upstream in
-`LaTeX-shared-files` and re-vendor. `_packages/` is on `TEXINPUTS` (via
-`.latexmkrc`), so the loads are plain `\usepackage{di-base-article}` with no path
-prefix. Files vendored but unused are kept with their `\usepackage` commented out,
-ready to activate.
+Rules of the road:
 
-The shared base is split into `di-base-core` (class-agnostic: engine-aware fonts,
-package loads, hyperref/cleveref, the theorem-environment family), plus
-`di-base-article` (amsart, section-scoped numbering) and `di-base-monograph`
-(memoir, chapter-scoped numbering + `axiom`); both class bases
-`\RequirePackage{di-base-core}` internally. `di-structures` carries shared
-real-valued-logic notation.
+- **A paper is a subdirectory** (name without a leading `_` or `.`) containing a
+  main `.tex` with `\documentclass`. Name the main file after the directory
+  (`my-paper/my-paper.tex`). Monograph chapters are `my-paper/my-paper-N-topic.tex`.
+- **Directories starting with `_` are shared infrastructure**, never papers.
+- **Each paper owns its `.sty`** for its own macros. **Shared code** lives in `_packages/`
+  and is **never edited here**; **shared references** live in the root `references.bib`
+  and are **never copied or forked** per paper.
 
 ## Quick start
 
 1. Click **"Use this template"** on GitHub to create your repository.
-2. Open it in a **GitHub Codespace** (or clone locally — see
-   [Local setup](#local-setup-macos-and-ubuntu) below for the required software).
-3. Pick one starting point and delete the other (each master comes with its own
-   `.sty`):
-   - keeping the **article**: delete `monograph-template.tex`,
-     `monograph-template.sty`, and the `monograph-template-*.tex` chapters;
-   - keeping the **monograph**: delete `article-template.tex` and
-     `article-template.sty`.
-4. Rename the one you kept — the master **and** its `.sty` together — and point
-   the master's `\usepackage` at the new name (e.g.
-   `git mv article-template.tex myproject.tex`,
-   `git mv article-template.sty myproject.sty`, then change
-   `\usepackage{article-template}` to `\usepackage{myproject}`). Start writing;
-   build with `make build`.
+2. Open it in a **GitHub Codespace** (recommended, especially on Windows) or
+   clone locally — see [Local setup](#local-setup-macos-and-ubuntu).
+3. Create a paper (in the Codespace terminal, macOS/Linux, or Git Bash):
+   ```bash
+   make new P=my-paper TYPE=article        # or TYPE=monograph
+   ```
+   *Without `make`/bash (e.g. plain Windows):* copy the folder `_templates/article/`
+   to a new folder `my-paper/` at the repo root, then rename every file
+   `PAPER*.tex`/`PAPER.sty` to `my-paper*`, and replace the word `PAPER` by `my-paper`
+   inside them (find-and-replace in VS Code). Also create `my-paper/latexmkrc`
+   containing the two lines
+   `@default_files = ('my-paper.tex');` and `do '../latexmkrc';`.
+4. Edit `my-paper/my-paper.tex` and `my-paper/my-paper.sty`. Saving a `.tex` in VS Code builds it.
 
-Both masters (and their `.sty` files) coexist at the root until you delete one —
-nothing is buried in a subdirectory. The vendored shared packages sit in
-`_packages/`; leave them as they are.
+## Building a paper
+
+Four equivalent ways; the PDF appears next to the source and intermediate files
+go to `my-paper/_build/` (both gitignored).
+
+```bash
+make my-paper              # from the repo root
+make build                 # every paper in the repository
+cd my-paper && latexmk     # from inside the paper's directory
+# VS Code: just save the .tex file (LaTeX Workshop builds on save)
+```
+
+The **traditional manual workflow also works** — each paper's main file tells
+LaTeX where the shared files are (`../_packages/` and `../references`), so no
+configuration, environment variables, or symlinks are needed:
+
+```bash
+cd my-paper
+pdflatex my-paper && bibtex my-paper && pdflatex my-paper && pdflatex my-paper
+```
+
+(Here the auxiliary files land beside the source instead of in `_build/`; they are gitignored.)
+
+### Sending a paper out (arXiv, journal, standalone repo)
+
+```bash
+make export P=my-paper     # writes _export/my-paper/
+```
+
+produces a **self-contained folder**: the paper's sources, only the `di-*.sty` files it
+uses, and `references.bib`, with the `../` paths rewritten. Build it with plain
+`pdflatex`/`bibtex` anywhere.
+
+## Shared resources
+
+### Vendored style files: `_packages/`
+
+The `di-*` files are **shared** style files, *vendored* into `_packages/`:
+pristine, byte-for-byte copies of the originals in the
+[`LaTeX-shared-files`](https://github.com/eduenez/LaTeX-shared-files) repo, each
+pinned to a commit hash in [`_packages/vendor.lock`](_packages/vendor.lock) and
+mirrored in a `%%% Vendored: repo/file @hash` comment above its `\usepackage`.
+This is a **"poor man's submodule"**: clone and build immediately, with no
+`git submodule` steps. **Never edit the files in `_packages/`** (see
+[`_packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md`](_packages/_DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md));
+change shared code upstream in `LaTeX-shared-files` and re-vendor. A paper's `.sty` loads
+what it needs with a plain `\usepackage{di-base-article}` (the main `.tex` sets
+`\input@path` to `../_packages/`; latexmk also adds it to `TEXINPUTS`).
+Paper-specific macros go in the paper's own `.sty`, never in `_packages/`.
+
+The shared base is split into `di-base-core` (class-agnostic: fonts, package loads,
+hyperref/cleveref, theorems), `di-base-article` (amsart) and `di-base-monograph`
+(memoir); both bases `\RequirePackage{di-base-core}`. `di-structures`, `di-ramsey`,
+`di-random`, `di-exercises` are optional topical packages (commented out in the templates).
+
+### Shared bibliography: `references.bib`
+
+One file at the repo root serves every paper (`\bibliography{../references}`).
+See [Bibliography workflow](#bibliography-workflow).
+
+### Moving an existing one-off repository into this one
+
+1. `make new P=<name> TYPE=article` (or `monograph`), then paste the old paper's
+   body into the new `.tex`; move figures/scripts into `<name>/`.
+2. Put the paper's own macros in `<name>/<name>.sty`; drop any `\usepackage` lines
+   already provided by `di-base-*`.
+3. **Merge its `.bib` entries into the root `references.bib`** (reuse an existing
+   entry when the work is already there; keys are `Author-Author:YYYY`).
+   If the references were typed inline in a `thebibliography`, convert each
+   `\bibitem` into a BibTeX entry and replace the block with
+   `\bibliographystyle{alpha}\bibliography{../references}`.
+4. Build, fix undefined citations, then retire the old repository.
 
 ## Local setup (macOS and Ubuntu)
 
@@ -125,7 +199,7 @@ Then, from the repo root:
 
 ```bash
 make install-hooks   # advisory pre-commit hook (see below)
-make build           # compile the template(s) end to end
+make build           # compile every paper end to end
 ```
 
 ## Editor setup (VS Code)
@@ -137,6 +211,7 @@ install them yourself:
 
 ```bash
 code --install-extension james-yu.latex-workshop
+code --install-extension tecosaur.latex-utilities
 code --install-extension eamodio.gitlens
 code --install-extension GitHub.copilot
 code --install-extension GitHub.copilot-chat
@@ -152,8 +227,11 @@ code --install-extension redhat.vscode-yaml
 [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)
 to this template's toolchain — no per-user configuration needed:
 
-- **Build on save**, via `latexmk` and `.latexmkrc` (PDF at the repo root,
-  intermediates in `_build/`).
+- **Soft-wrap of long lines** is **always on** for `.tex`, `.bib`, and Markdown —
+  you never need to scroll sideways. (Only personal preferences — theme,
+  font size, keybindings — are left to you; they are not part of this repo.)
+- **Build on save**, via `latexmk` and the shared `latexmkrc` (works for any
+  paper, including chapter files; PDF beside the source, intermediates in `_build/`).
 - **PDF preview** opens in an editor tab with SyncTeX (click in the PDF to
   jump to source, and back).
 - **`chktex` linting** as you type, and **`latexindent`** (via
@@ -164,57 +242,6 @@ to this template's toolchain — no per-user configuration needed:
 Only `latexmk`, `chktex`, `latexindent`, and `texcount` need to be on your
 `PATH` for these to work — see [Local setup](#local-setup-macos-and-ubuntu)
 above.
-
-## Repository structure
-
-```
-.
-├── .chktexrc                 # chktex linter configuration
-├── .devcontainer/            # Codespace / Dev Container (TeX Live + VS Code)
-├── .github/workflows/
-│   └── lint-and-build.yml    # CI: advisory lint + build PDFs
-├── .gitignore
-├── .latexmkrc                # pdfLaTeX; aux → _build/, PDF → repo root; _packages/ on TEXINPUTS
-├── .vscode/
-│   ├── settings.json          # LaTeX Workshop, chktex, latexindent, spell-check wiring
-│   └── extensions.json        # recommended-extensions prompt (Codespace + local)
-├── article-template.tex      # research-article master (amsart): \documentclass + metadata only
-├── article-template.sty      #   its style file: loads di-base-article + project additions
-├── monograph-template.tex    # monograph master (memoir): \documentclass + metadata only
-├── monograph-template.sty    #   its style file: loads di-base-monograph + project additions
-├── monograph-template-1-introduction.tex   # monograph chapters (\include'd)
-├── monograph-template-2-background.tex
-├── monograph-template-3-main-results.tex
-├── monograph-template-4-conclusion.tex
-├── _packages/                 # vendored shared style files ("poor man's submodule")
-│   ├── _DO_NOT_EDIT_FILES_IN_THIS_DIRECTORY.md   # the never-edit rule
-│   ├── vendor.lock           # provenance pins: <file> <upstream repo> <commit>
-│   ├── di-base-core.sty      # class-agnostic core (fonts, packages, cleveref, theorems)
-│   ├── di-base-article.sty   # amsart base (section-scoped numbering)
-│   ├── di-base-monograph.sty # memoir base (chapter-scoped numbering + axiom)
-│   └── di-structures.sty     # shared real-valued-logic notation (+ di-ramsey/random/exercises)
-├── references.bib            # the single bibliography (BibTeX), vendored-but-editable
-├── latexindent.yaml
-├── Makefile
-├── _scripts/
-│   ├── setup-hooks.sh        # installs the advisory pre-commit hook
-│   └── texwrap.py            # semantic line-wrapper
-├── STYLE.md                  # writing conventions
-└── README.md
-```
-
-## Building
-
-pdfLaTeX via `latexmk`. Intermediates (`.aux`, `.log`, `.bbl`, …) go to `_build/`;
-the finished **PDF lands at the repo root** next to the source. Both are
-gitignored.
-
-```bash
-make build                 # build every "main" .tex (one with \documentclass)
-latexmk article-template   # or build a single document directly
-```
-
-In VS Code / Codespace, saving a `.tex` triggers an automatic build.
 
 ## Conventions (see [STYLE.md](STYLE.md))
 
@@ -231,7 +258,8 @@ make check     # dry-run: what isn't wrapped
 ## Bibliography workflow
 
 [`references.bib`](references.bib) lives at the repo **root** (not in
-`_packages/`) and is **vendored-but-editable**: it is a synced snapshot of the
+`_packages/`), is shared by **all** papers (never copy it into a paper directory,
+so entries cannot diverge between papers), and is **vendored-but-editable**: it is a synced snapshot of the
 group's master database,
 [`math-bibliography`](https://github.com/eduenez/math-bibliography), pinned in
 [`_packages/vendor.lock`](_packages/vendor.lock) to record the last sync point. The
@@ -245,7 +273,7 @@ reconciles those additions back into the master. The workflow:
 
 1. **Cite** with `\cite{key}` — BibTeX emits only the works you actually cite,
    so a large `references.bib` does not bloat the compiled bibliography.
-2. **Add entries directly** when you cite something not yet present. Keys follow
+2. **Add entries directly** to the root `references.bib` when you cite something not yet present. Keys follow
    `Author-Author:YYYY` (e.g. `MacLane-Moerdijk:1992`).
 3. **Re-sync periodically.** The maintainer re-syncs `references.bib` from the
    master (bumping the pin in `vendor.lock`) to pick up upstream additions and
@@ -273,18 +301,16 @@ This template deliberately does **not** block collaborators on formatting:
   the command above to refresh it.
 - **CI** ([lint-and-build.yml](.github/workflows/lint-and-build.yml)) — on push/PR
   to `main`: line-width and `chktex` checks are advisory (`continue-on-error`);
-  only `$$`/`\eqnarray` are hard-gated. The build job compiles every main
-  document (auto-discovered) and uploads the PDFs as artifacts.
+  only `$$`/`\eqnarray` are hard-gated. The build job runs `make build`, compiling every
+  paper (auto-discovered) and uploads the PDFs as artifacts.
 
 ## Adding chapters (monograph)
 
-Chapter files are named `<master>-N-<topic>.tex` and live beside the master (the
-template ships `monograph-template-1-introduction.tex` through
-`monograph-template-4-conclusion.tex`).
+Chapter files are named `<paper>-N-<topic>.tex` and live beside the main file inside
+the paper's directory (the monograph template ships four).
 
-1. Create `monograph-template-5-new-topic.tex` at the root (use your master's
-   name and the next number once you have renamed the master).
-2. Add `\include{monograph-template-5-new-topic}` to your master `.tex`.
+1. Create `my-book/my-book-5-new-topic.tex`.
+2. Add `\include{my-book-5-new-topic}` to `my-book/my-book.tex`.
 3. Optionally restrict compilation with `\includeonly{...}`.
 
 ## License

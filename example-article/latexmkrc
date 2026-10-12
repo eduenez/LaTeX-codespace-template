@@ -1,0 +1,2 @@
+@default_files = ('example-article.tex');
+do '../latexmkrc';

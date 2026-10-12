@@ -11,8 +11,9 @@
 # locally); the pin records the last sync point from the master so local
 # additions can be diffed and backported upstream.
 #
-# This template ships BOTH class bases: article-template.sty loads
-# di-base-article, monograph-template.sty loads di-base-monograph.
+# This template ships BOTH class bases: an article's <paper>.sty loads
+# di-base-article, a monograph's <paper>.sty loads di-base-monograph.
+# All papers (subdirectories of the repo root) share these files.
 
 di-base-core.sty       eduenez/LaTeX-shared-files  af98e4f
 di-base-article.sty    eduenez/LaTeX-shared-files  af98e4f

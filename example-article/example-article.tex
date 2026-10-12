@@ -1,19 +1,23 @@
-% article-template.tex — Template for a research paper (amsart class)
+% example-article.tex — Template for a research paper (amsart class)
 %
-% Compile: latexmk (uses .latexmkrc at the project root)
+% Compile: latexmk (shared config: ../latexmkrc); or manually
+%          pdflatex example-article; bibtex example-article; pdflatex example-article; pdflatex example-article
 % Engine:  pdfLaTeX
 
 \documentclass[12pt]{amsart}
 
 % ═════════════════════════════════════════════════════════════════════════════
 % ┃ ALL \usepackage, macro, and environment declarations live in                ┃
-% ┃ article-template.sty (loaded below), which loads the vendored shared        ┃
-% ┃ packages from packages/ and then this project's additions. Do NOT add       ┃
+% ┃ example-article.sty (loaded below), which loads the vendored shared        ┃
+% ┃ packages from ../_packages/ and then this project's additions. Do NOT add       ┃
 % ┃ \usepackage / \newcommand / \newtheorem here. This preamble carries ONLY    ┃
 % ┃ the document class, that one style package, and semantic metadata           ┃
 % ┃ (title / author / date / subjclass / keywords). See STYLE.md.               ┃
 % ═════════════════════════════════════════════════════════════════════════════
-\usepackage{article-template}
+% Where the vendored shared .sty files live (one level up). This makes plain
+% pdflatex work with no TEXINPUTS and no symlinks; latexmk also sets it up.
+\makeatletter\def\input@path{{../_packages/}{_packages/}}\makeatother
+\usepackage{example-article}
 
 % ─── Document Metadata ──────────────────────────────────────────────────────
 \title{Title of the Paper}
@@ -150,7 +154,7 @@ see~\cite{example2024}.
 
 % ─── Bibliography ────────────────────────────────────────────────────────────
 \bibliographystyle{alpha}
-\bibliography{references}
+\bibliography{../references}
 
 \end{document}
 

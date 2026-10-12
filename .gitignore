@@ -9,6 +9,7 @@
 
 # ── Build output directory ───────────────────────────────────────────────────
 _build/
+_export/
 
 # ── Core LaTeX auxiliary files ───────────────────────────────────────────────
 *.aux
@@ -32,6 +33,8 @@ _build/
 *.ps
 *.eps
 *.pdf
+# ...but keep PDF figures inside a paper's figures/ directory
+!*/figures/**/*.pdf
 
 # ── Bibliography auxiliary files ─────────────────────────────────────────────
 *.bbl

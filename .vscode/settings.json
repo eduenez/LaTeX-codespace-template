@@ -1,9 +1,6 @@
 {
-    "editor.fontSize": 14,
     "editor.wordWrap": "on",
-    "editor.rulers": [
-        90
-    ],
+    "editor.wrappingIndent": "indent",
     "files.eol": "\n",
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
@@ -16,6 +13,8 @@
         "*.sty": "latex"
     },
     "[latex]": {
+        "editor.wordWrap": "on",
+        "editor.wrappingIndent": "indent",
         "editor.defaultFormatter": "James-Yu.latex-workshop"
     },
     "latex-workshop.latex.autoBuild.run": "onSave",
@@ -33,12 +32,15 @@
             "name": "latexmk",
             "command": "latexmk",
             "args": [
+                "-r",
+                "%WORKSPACE_FOLDER%/latexmkrc",
                 "-synctex=1",
                 "-interaction=nonstopmode",
                 "-file-line-error",
                 "-cd",
                 "%DOC%"
-            ]
+            ],
+            "env": {}
         }
     ],
     "latex-workshop.linting.chktex.enabled": true,
@@ -72,5 +74,19 @@
     "latex-utilities.countWord.args": [
         "%DOCFILE%"
     ],
-    "latex-utilities.countWord.format": "${words} words total, ${wordsBody} in body"
+    "latex-utilities.countWord.format": "${words} words total, ${wordsBody} in body",
+    "[tex]": {
+        "editor.wordWrap": "on",
+        "editor.wrappingIndent": "indent"
+    },
+    "[bibtex]": {
+        "editor.wordWrap": "on",
+        "editor.wrappingIndent": "indent"
+    },
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.wrappingIndent": "indent"
+    },
+    "latex-workshop.latex.rootFile.doNotPrompt": true,
+    "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": true
 }

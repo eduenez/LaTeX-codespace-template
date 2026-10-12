@@ -1,44 +1,53 @@
-# Makefile — Build, format, and lint targets for LaTeX projects
+# Makefile — Build, format, and lint targets for a multi-paper LaTeX repository
 #
-# Flat layout: all .tex files live at the repo root. "Main" documents are the
-# ones containing \documentclass; chapter files \include'd by a monograph are
-# not built directly. latexmk (via .latexmkrc) puts intermediates in _build/
-# and the finished PDF at the repo root.
+# Layout: every paper lives in its own subdirectory (<paper>/<paper>.tex).
+# Directories whose names start with "_" or "." are infrastructure
+# (_packages, _scripts, _templates, _build, …), never papers. A "main" document
+# is a .tex containing \documentclass; \include'd chapter files are not built
+# directly. latexmk (via ./latexmkrc) puts intermediates in <paper>/_build/ and
+# the finished PDF in <paper>/.
 #
-# Targets:
+# Targets (P=<paper> restricts the format/lint/clean targets to one paper):
 #   make                 – show help
-#   make build           – build every main document (auto-discovered)
+#   make new P=name TYPE=article|monograph   – create a new paper from a template
+#   make build           – build every paper (auto-discovered)
+#   make <paper>         – build one paper
+#   make export P=name   – self-contained copy in _export/<name>/ (for arXiv etc.)
 #   make format          – do it all: fashion + reflow (idempotent)
-#   make reflow          – wrap + indent (idempotent re-flow)
-#   make fashion         – modernize typography (accents, quotes, tabs)
-#   make wrap            – semantic line-wrap all .tex (break positions only)
-#   make indent          – whitespace/indentation normalization (latexindent)
-#   make sep             – normalize sectioning banners (advisory)
-#   make check           – dry-run: report .tex needing fashion/wrapping
-#   make lint            – run chktex on all .tex
-#   make clean           – remove _build/ and stray auxiliaries
+#   make reflow | fashion | wrap | indent | sep | check | lint
+#   make clean           – remove build artifacts
 #   make install-hooks   – install the advisory git pre-commit hook
 #   make help            – show this help
 
-COLS    := 256
-TEX_SRC := $(wildcard *.tex)
-# Main documents = files that contain \documentclass.
-MAIN_SRC := $(shell grep -l '\\documentclass' $(TEX_SRC) 2>/dev/null)
+COLS := 256
+# Main documents: <dir>/<file>.tex containing \documentclass, dir not starting with _ or .
+ALL_TEX  := $(wildcard [!_.]*/*.tex)
+MAIN_SRC := $(shell grep -l '\\documentclass' $(ALL_TEX) 2>/dev/null)
+PAPERS   := $(sort $(patsubst %/,%,$(dir $(MAIN_SRC))))
+# Files the formatters/linters act on: one paper (P=) or all papers.
+ifdef P
+TEX_SRC := $(wildcard $(P)/*.tex)
+else
+TEX_SRC := $(foreach d,$(PAPERS),$(wildcard $(d)/*.tex))
+endif
+TYPE ?= article
 
-.PHONY: all help build article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(MAIN_SRC) $(MAIN_SRC:.tex=)
+.PHONY: all help new export build article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(PAPERS)
 
 all: help
 
 ## help: Show available targets
 help:
-	@echo "LaTeX Project — Makefile Targets"
+	@echo "LaTeX Papers — Makefile Targets"
 	@echo ""
-	@echo "  Building:"
-	@echo "    make build           Build every main document (pdfLaTeX via latexmk)"
+	@echo "  Papers:"
+	@echo "    make new P=name TYPE=article|monograph   Create a new paper from a template"
+	@echo "    make build           Build every paper (pdfLaTeX via latexmk)"
 	@echo "                         synonyms: article, pdf, PDF, compile"
-	@echo "    make <name>          Build one document by name, e.g. make $(firstword $(MAIN_SRC:.tex=))"
+	@echo "    make <paper>         Build one paper, e.g. make $(firstword $(PAPERS))"
+	@echo "    make export P=name   Self-contained copy in _export/<name>/"
 	@echo ""
-	@echo "  Formatting:"
+	@echo "  Formatting (add P=<paper> to restrict to one paper):"
 	@echo "    make format          Do it all: fashion + reflow"
 	@echo "    make reflow          Re-flow: wrap + indent (idempotent)"
 	@echo "    make fashion         Modernize typography (accents, quotes, tabs)"
@@ -48,25 +57,33 @@ help:
 	@echo "    make check           Dry-run: report .tex needing fashion/wrapping"
 	@echo ""
 	@echo "  Linting & cleaning:"
-	@echo "    make lint            Run chktex on all .tex"
-	@echo "    make clean           Remove _build/ and stray auxiliaries"
+	@echo "    make lint            Run chktex on all paper .tex"
+	@echo "    make clean           Remove build artifacts (add P=<paper> for one)"
 	@echo "    make install-hooks   Install the advisory git pre-commit hook"
 	@echo ""
-	@echo "  Main documents detected: $(MAIN_SRC)"
+	@echo "  Papers detected: $(PAPERS)"
 
-## build: Build every main document.  Synonyms (same effect): article, pdf,
-## PDF, compile — so authors can type whichever reads naturally.
+## new: Create a paper:  make new P=my-paper TYPE=article|monograph
+new:
+	@test -n "$(P)" || { echo "usage: make new P=<name> TYPE=article|monograph"; exit 2; }
+	@bash _scripts/new-paper.sh "$(P)" "$(TYPE)"
+
+## export: Self-contained copy of one paper in _export/<P>/
+export:
+	@test -n "$(P)" || { echo "usage: make export P=<paper>"; exit 2; }
+	@bash _scripts/export-paper.sh "$(P)"
+
+## build: Build every paper.  Synonyms (same effect): article, pdf, PDF, compile
 build article pdf PDF compile:
-	@if [ -z "$(MAIN_SRC)" ]; then echo "No main .tex (with \\documentclass) found."; exit 1; fi
-	@for f in $(MAIN_SRC); do \
-	  echo "── Building $$f ──"; \
-	  latexmk "$${f%.tex}"; \
+	@if [ -z "$(PAPERS)" ]; then echo "No papers found (see README: make new P=<name>)."; exit 1; fi
+	@for d in $(PAPERS); do \
+	  echo "── Building $$d ──"; \
+	  ( cd "$$d" && latexmk -r ../latexmkrc ) || exit 1; \
 	done
 
-# Build a single named document: `make NFL` or `make NFL.tex` (one target per
-# main file, generated from MAIN_SRC), for repos with several documents.
-$(MAIN_SRC) $(MAIN_SRC:.tex=):
-	@latexmk "$(basename $@)"
+# Build one paper by directory name: `make my-paper`.
+$(PAPERS):
+	@cd "$@" && latexmk -r ../latexmkrc
 
 ## format: Do it all — modernize typography, then reflow
 format:
@@ -114,11 +131,15 @@ lint:
 	  chktex -q -l .chktexrc "$$f"; \
 	done
 
-## clean: Remove build artifacts
+## clean: Remove build artifacts (all papers, or one with P=<paper>)
+CLEAN_DIRS := $(if $(P),$(P),$(PAPERS))
 clean:
-	rm -rf _build
-	rm -f *.bak[0-9] *.bak[0-9][0-9] indent.log
-	rm -f *.aux *.log *.out *.toc *.fls *.fdb_latexmk *.bbl *.blg *.synctex.gz
+	@for d in $(CLEAN_DIRS) _export; do \
+	  rm -rf "$$d/_build"; \
+	  rm -f "$$d"/*.bak[0-9] "$$d"/*.bak[0-9][0-9] "$$d"/indent.log; \
+	  rm -f "$$d"/*.aux "$$d"/*.log "$$d"/*.out "$$d"/*.toc "$$d"/*.fls "$$d"/*.fdb_latexmk "$$d"/*.bbl "$$d"/*.blg "$$d"/*.synctex.gz; \
+	done
+	@rm -rf _export
 
 ## install-hooks: Install the advisory git pre-commit hook
 install-hooks:

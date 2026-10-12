@@ -17,16 +17,16 @@ sync can diff them cleanly.
   `LaTeX-shared-files`, then re-vendor (copy the new file here and bump its commit
   hash in `vendor.lock`). Ask the maintainer (Eduardo).
 - **Project-specific additions** go in the project style file
-  (`../article-template.sty` or `../monograph-template.sty`, the
+  (`../<paper>/<paper>.sty`, the
   "Project-specific additions" section), never here.
 
 ## What loads these
 
-- `article-template.sty` loads `di-base-article` (amsart, section-scoped numbering).
-- `monograph-template.sty` loads `di-base-monograph` (memoir, chapter-scoped numbering).
+- An article's `<paper>.sty` loads `di-base-article` (amsart, section-scoped numbering).
+- A monograph's `<paper>.sty` loads `di-base-monograph` (memoir, chapter-scoped numbering).
 
-Both `\RequirePackage{di-base-core}` internally. `_packages/` is on `TEXINPUTS`
-(see `../.latexmkrc`), so no path prefix is needed. Files present but **not**
+Both `\RequirePackage{di-base-core}` internally. Each paper's main `.tex` points `\input@path` here (and `../latexmkrc` sets
+`TEXINPUTS`), so no path prefix is needed. All papers in the repository share these files. Files present but **not**
 loaded (their `\usepackage` line commented out in a project `.sty`) are kept here
 only for convenient future activation — this is the pattern a new project copied
 from this template should follow: vendor what you need, comment the rest.

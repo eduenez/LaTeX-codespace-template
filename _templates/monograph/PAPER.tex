@@ -1,6 +1,7 @@
-% monograph-template.tex — Main file for a book/monograph project (memoir class)
+% PAPER.tex — Main file for a book/monograph project (memoir class)
 %
-% Compile: latexmk (uses .latexmkrc at the project root)
+% Compile: latexmk (shared config: ../latexmkrc); or manually
+%          pdflatex PAPER; bibtex PAPER; pdflatex PAPER; pdflatex PAPER
 % Engine:  pdfLaTeX
 %
 % To compile only specific chapters, uncomment and edit the \includeonly line.
@@ -11,17 +12,20 @@
 % ═════════════════════════════════════════════════════════════════════════════
 % ┃ ALL \usepackage, macro, and environment declarations — including the memoir ┃
 % ┃ page layout (\setlrmarginsandblock, \chapterstyle, …) — live in             ┃
-% ┃ monograph-template.sty (loaded below), which loads the vendored shared      ┃
-% ┃ packages from packages/ and then this project's additions. Do NOT add       ┃
+% ┃ PAPER.sty (loaded below), which loads the vendored shared      ┃
+% ┃ packages from ../_packages/ and then this project's additions. Do NOT add       ┃
 % ┃ \usepackage / \newcommand / \newtheorem / layout commands here. This        ┃
 % ┃ preamble carries ONLY the document class, that one style package, and       ┃
 % ┃ semantic metadata (title / author / date). See STYLE.md.                    ┃
 % ═════════════════════════════════════════════════════════════════════════════
-\usepackage{monograph-template}
+% Where the vendored shared .sty files live (one level up). This makes plain
+% pdflatex work with no TEXINPUTS and no symlinks; latexmk also sets it up.
+\makeatletter\def\input@path{{../_packages/}{_packages/}}\makeatother
+\usepackage{PAPER}
 
 % ─── Compilation Control ────────────────────────────────────────────────────
 % Uncomment the next line and list only the chapters you want to compile:
-% \includeonly{monograph-template-1-introduction,monograph-template-2-background,monograph-template-3-main-results,monograph-template-4-conclusion}
+% \includeonly{PAPER-1-introduction,PAPER-2-background,PAPER-3-main-results,PAPER-4-conclusion}
 
 % ─── Document Metadata ──────────────────────────────────────────────────────
 \title{%
@@ -61,10 +65,10 @@
 % ─── Content Chapters ────────────────────────────────────────────────────────
 % Each chapter lives in its own file in this directory.
 % Use \include (not \input) so that \includeonly works.
-\include{monograph-template-1-introduction}
-\include{monograph-template-2-background}
-\include{monograph-template-3-main-results}
-\include{monograph-template-4-conclusion}
+\include{PAPER-1-introduction}
+\include{PAPER-2-background}
+\include{PAPER-3-main-results}
+\include{PAPER-4-conclusion}
 
 \backmatter
 
@@ -74,7 +78,7 @@
 \phantomsection
 \addcontentsline{toc}{chapter}{\bibname}
 \bibliographystyle{alpha}
-\bibliography{references}
+\bibliography{../references}
 
 \end{document}
 

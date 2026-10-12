@@ -28,14 +28,14 @@ jobs:
       # via `make fashion`. Surfaces drift as an annotation; never gates.
       - name: Check typography (advisory)
         continue-on-error: true
-        run: python3 _scripts/texfashion.py --check *.tex
+        run: python3 _scripts/texfashion.py --check $(find . -name "*.tex" -not -path "./_*" -not -path "./.*")
 
       # Advisory: the project uses semantic wrapping (one sentence/clause per
       # line via `make wrap`). This surfaces drift as an annotation but does NOT
       # gate the pipeline — pre-existing prose must not block collaborators.
       - name: Check semantic wrapping (advisory)
         continue-on-error: true
-        run: python3 _scripts/texwrap.py --check --cols 256 *.tex
+        run: python3 _scripts/texwrap.py --check --cols 256 $(find . -name "*.tex" -not -path "./_*" -not -path "./.*")
 
       # Advisory: chktex flags style nits (non-breaking spaces, quote style, …)
       # that never prevent compilation, so it must not gate the build.
@@ -43,7 +43,7 @@ jobs:
         continue-on-error: true
         uses: j2kun/chktex-action@main
         with:
-          args: "-q -l .chktexrc *.tex"
+          args: "-q -l .chktexrc $(find . -name '*.tex' -not -path './_*' -not -path './.*')"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -52,11 +52,12 @@ jobs:
         run: |
           echo "Checking for banned patterns..."
           ERRORS=0
-          if grep -n '\$\$' *.tex; then
+          TEX=$(find . -name "*.tex" -not -path "./_*" -not -path "./.*")
+          if grep -n '\$\$' $TEX; then
             echo "ERROR: Double-dollar display math found. Use \\[...\\] or equation* instead."
             ERRORS=1
           fi
-          if grep -n '\\begin{eqnarray' *.tex; then
+          if grep -n '\\begin{eqnarray' $TEX; then
             echo "ERROR: \\eqnarray found. Use align/align* instead."
             ERRORS=1
           fi
@@ -78,25 +79,15 @@ jobs:
             texlive-full \
             latexmk
 
-      # Build every "main" .tex (one with \documentclass); chapter files
-      # \include'd by a monograph are skipped. Auto-discovery keeps this working
-      # after a child project deletes or renames a template file.
-      - name: Build all main documents
-        run: |
-          shopt -s nullglob
-          built=0
-          for f in *.tex; do
-            if grep -q '\\documentclass' "$f"; then
-              echo "── Building $f ──"
-              latexmk "${f%.tex}"
-              built=1
-            fi
-          done
-          if [ "$built" -eq 0 ]; then echo "No main .tex found"; exit 1; fi
+      # Build every paper: each subdirectory (not starting with _ or .) holding
+      # a main .tex (one with \documentclass). Run from inside the paper dir,
+      # exactly as a user would.
+      - name: Build all papers
+        run: make build
 
       - name: Upload PDFs
         uses: actions/upload-artifact@v4
         with:
           name: compiled-pdfs
-          path: "*.pdf"
+          path: "*/*.pdf"
           retention-days: 14

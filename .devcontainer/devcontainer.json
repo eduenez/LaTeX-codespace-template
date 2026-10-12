@@ -11,6 +11,7 @@
             "extensions": [
                 // LaTeX
                 "james-yu.latex-workshop",
+                "tecosaur.latex-utilities",
                 // Git
                 "eamodio.gitlens",
                 // GitHub
@@ -25,86 +26,8 @@
                 "yzhang.markdown-all-in-one",
                 // YAML (for config files)
                 "redhat.vscode-yaml"
-            ],
-            "settings": {
-                // ── General editor ──────────────────────────────────────
-                "files.eol": "\n",
-                "files.trimTrailingWhitespace": true,
-                "files.insertFinalNewline": true,
-                "editor.wordWrap": "on",
-                "editor.rulers": [90],
-                "editor.fontSize": 14,
-                "files.autoSave": "afterDelay",
-                "files.autoSaveDelay": 120000,
-                "files.associations": {
-                    "*.tex": "latex",
-                    "*.bib": "bibtex",
-                    "*.cls": "latex",
-                    "*.sty": "latex"
-                },
-
-                // ── LaTeX Workshop ──────────────────────────────────────
-                "[latex]": {
-                    "editor.defaultFormatter": "James-Yu.latex-workshop"
-                },
-                "latex-workshop.latex.autoBuild.run": "onSave",
-                // The PDF lands at the repo root; intermediates go to _build/
-                // (both governed by .latexmkrc). Let latexmk read .latexmkrc
-                // rather than forcing -outdir here.
-                "latex-workshop.latex.outDir": "%DIR%",
-                "latex-workshop.latex.recipes": [
-                    {
-                        "name": "latexmk",
-                        "tools": ["latexmk"]
-                    }
-                ],
-                "latex-workshop.latex.tools": [
-                    {
-                        "name": "latexmk",
-                        "command": "latexmk",
-                        "args": [
-                            "-synctex=1",
-                            "-interaction=nonstopmode",
-                            "-file-line-error",
-                            "-cd",
-                            "%DOC%"
-                        ],
-                        "env": {}
-                    }
-                ],
-                "latex-workshop.latex.clean.subfolder.enabled": true,
-                "latex-workshop.latex.autoClean.run": "onFailed",
-                "latex-workshop.view.pdf.viewer": "tab",
-                "latex-workshop.linting.chktex.enabled": true,
-                "latex-workshop.linting.run": "onType",
-                "latex-workshop.latexindent.path": "latexindent",
-                "latex-workshop.latexindent.args": [
-                    "-c", "%DIR%/",
-                    "%TMPFILE%",
-                    "-l", "%WORKSPACE_FOLDER%/latexindent.yaml",
-                    "-y=defaultIndent: '%INDENT%'"
-                ],
-
-                // ── Spell checker ───────────────────────────────────────
-                "cSpell.language": "en",
-                "cSpell.enableFiletypes": ["latex", "bibtex"],
-
-                // ── Copilot ─────────────────────────────────────────────
-                "github.copilot.enable": {
-                    "latex": true,
-                    "markdown": true,
-                    "bibtex": true,
-                    "plaintext": true
-                },
-
-                // ── Word count ──────────────────────────────────────────
-                "latex-utilities.countWord.path": "texcount",
-                "latex-utilities.countWord.args": ["%DOCFILE%"],
-                "latex-utilities.countWord.format": "${words} words total, ${wordsBody} in body",
-
-                // ── Formatting on save ──────────────────────────────────
-                "editor.formatOnSave": true
-            }
+            ]
+            // Editor/LaTeX settings come from .vscode/settings.json (single source of truth).
         }
     }
 }
