@@ -30,7 +30,7 @@ house conventions, and help the person you are working with adopt those conventi
   Change shared code upstream (`LaTeX-shared-files`) and re-vendor.
 - `_templates/{article,monograph}/` — skeletons used by `make new` (placeholder name `PAPER`).
 - `_scripts/` — `new-paper.sh`, `export-paper.sh`, `doctor.sh`, `texwrap.py`, `texfashion.py`, `texsep.py`,
-  `setup-hooks.sh`. `latexmkrc` (root, non-hidden) and `Makefile` are the shared entry points.
+  `setup-hooks.sh`, and `migrate/` (tools for importing and converting external repositories: see `CONVERTING.md`). `latexmkrc` (root, non-hidden) and `Makefile` are the shared entry points.
 - Directories starting with `_` are infrastructure, not papers. There are **no submodules** (students on
   Windows and Git beginners use this repository); symlinks are not used for LaTeX files.
 
@@ -81,6 +81,26 @@ Never run `latexmk` at the repository root. Built PDFs and `_build/` are git-ign
 9. **Git.** Small, specific commits ("Add proof of Lemma 3.2"). Pull before you start, push when asked. Do not rewrite
    history, force-push, delete branches or files someone else owns, or commit generated files, unless explicitly asked.
    Ask before bulk or cross-paper changes (renames, reformatting whole files).
+
+## Converting an external repository or document into a paper directory
+
+If you are asked to bring an outside manuscript into this repository — a one-off repository, a loose `.tex`, an Overleaf
+export, a co-author's repository that follows none of these conventions — **follow `CONVERTING.md` step by step**. In outline:
+
+1. **Decide with the user first**: source and branch, target repository, the new directory/file names (underscore words,
+   proper names capitalised, `book_<topic>/<topic>_book.tex`), the printed-output policy (the paper keeps its own look; only
+   bibliography formatting, unified symbols and approved typo fixes may change the print), and who must be told.
+2. **Inventory** the source read-only; build it as it is and keep that PDF as the *baseline* (record pre-existing errors).
+3. **Import with history**: `python3 _scripts/migrate/import_repo.py <source> --dir <name> --rename old:new`
+   (never rewrite the source; authors and dates are preserved; junk is left behind).
+4. **Convert in separate, verified commits**: make it build here (`<name>.sty`, `latexmkrc`, `\input@path`) → notation
+   (`macros.py`, `texfix.py macros|bbb|mods`; shared names; one macro per symbol) → bibliography (reuse/add entries in the root
+   `references.bib`, house-style keys, `\cite` keys renamed) → unwrap, `make format` → labels and `\cref` → banners.
+5. **Verify after every step** with `pdfdiff.py` against the baseline: same page count; text differences only for the date,
+   bibliography formatting, unified symbols and approved fixes.
+6. **Do not decide silently**: bring the questions in `CONVERTING.md` §8 to the user; never delete dead code or restructure
+   content unasked; never push or force-push unless asked.
+7. **Retire the old repository** with `_scripts/migrate/obsolete_notice.py` once the user has reviewed the result.
 
 ## Coaching protocol
 

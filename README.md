@@ -152,6 +152,11 @@ make doctor        # read-only check of tools, Git identity, hooks; says how to 
 New to the repository (or to Git/LaTeX)? [`ONBOARDING.md`](ONBOARDING.md) is a 10-minute guided tour and a
 cheat sheet "old habit → house way". It is meant to be walked through interactively with an AI assistant.
 
+## Bringing in an existing repository or document
+
+[`CONVERTING.md`](CONVERTING.md) is the playbook for importing an outside manuscript — with its commit history — as a paper
+directory and converting it to the house conventions (tools in `_scripts/migrate/`), and for retiring the old repository.
+
 ## Working with AI assistants (Copilot, Claude Code, …)
 
 [`AGENTS.md`](AGENTS.md) holds the instructions every assistant follows (`CLAUDE.md` is a symlink to it for tools that
