@@ -89,6 +89,8 @@ if [ "$WARN" -ne 0 ]; then
   echo ""
   echo "pre-commit: the above are ADVISORY only — your commit will proceed."
   echo "            This hook never blocks. See README.md for context."
+  echo "            Tip: 'make format' fixes most of this; ONBOARDING.md explains the house practices"
+  echo "            (ask your AI assistant for 'the onboarding tour')."
 fi
 
 exit 0

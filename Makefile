@@ -26,19 +26,25 @@ MAIN_SRC := $(shell grep -l '\\documentclass' $(ALL_TEX) 2>/dev/null)
 PAPERS   := $(sort $(patsubst %/,%,$(dir $(MAIN_SRC))))
 # Files the formatters/linters act on: one paper (P=) or all papers.
 ifdef P
-TEX_SRC := $(wildcard $(P)/*.tex)
+TEX_SRC := $(filter-out %/icons.tex %/ramsey_graphs.tex,$(shell find $(P) -name '*.tex' -not -path '*/_*' 2>/dev/null))
 else
-TEX_SRC := $(foreach d,$(PAPERS),$(wildcard $(d)/*.tex))
+TEX_SRC := $(filter-out %/icons.tex %/ramsey_graphs.tex,$(foreach d,$(PAPERS),$(shell find $(d) -name '*.tex' -not -path '*/_*' 2>/dev/null)))
 endif
 TYPE ?= article
 
-.PHONY: all help new export build article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(PAPERS)
+doctor:
+	@bash _scripts/doctor.sh
+
+.PHONY: doctor all help new export build article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(PAPERS)
 
 all: help
 
 ## help: Show available targets
 help:
 	@echo "LaTeX Papers — Makefile Targets"
+	@echo ""
+	@echo "  Setup:"
+	@echo "    make doctor          Check tools and setup; says how to fix what is missing"
 	@echo ""
 	@echo "  Papers:"
 	@echo "    make new P=name TYPE=article|monograph   Create a new paper from a template"
@@ -76,10 +82,11 @@ export:
 ## build: Build every paper.  Synonyms (same effect): article, pdf, PDF, compile
 build article pdf PDF compile:
 	@if [ -z "$(PAPERS)" ]; then echo "No papers found (see README: make new P=<name>)."; exit 1; fi
-	@for d in $(PAPERS); do \
+	@fail=""; for d in $(PAPERS); do \
 	  echo "── Building $$d ──"; \
-	  ( cd "$$d" && latexmk -r ../latexmkrc ) || exit 1; \
-	done
+	  ( cd "$$d" && latexmk -r ../latexmkrc ) || fail="$$fail $$d"; \
+	done; \
+	if [ -n "$$fail" ]; then echo "BUILD FAILED for:$$fail"; exit 1; fi
 
 # Build one paper by directory name: `make my-paper`.
 $(PAPERS):

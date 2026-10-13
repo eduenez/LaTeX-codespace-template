@@ -14,8 +14,8 @@ plus a fully configured Codespace for cloud editing in VS Code.
   `\newtheorem` lives in the paper's style file `<paper>.sty`, which loads the
   shared packages **vendored** in `_packages/`.
 - **Bibliography:** BibTeX, style `alpha`, from **one shared** root `references.bib`.
-- **No submodules, no symlinks:** everything works with a plain clone (including
-  on Windows). Shared files are reached by relative path (`../`).
+- **No submodules, no symlinks needed:** everything builds from a plain clone (including
+  on Windows); the only symlink, `CLAUDE.md` → `AGENTS.md`, is optional. Shared files are reached by relative path (`../`).
 - **Checks:** advisory — they guide, they don't block (see below).
 
 ## Repository layout
@@ -25,7 +25,8 @@ plus a fully configured Codespace for cloud editing in VS Code.
 ├── references.bib            # THE shared bibliography (vendored-but-editable)
 ├── latexmkrc                 # shared latexmk configuration (non-hidden)
 ├── Makefile                  # build / format / lint for all papers
-├── CLAUDE.md                 # instructions for AI agents (same rules as here)
+├── AGENTS.md                 # instructions for AI assistants (CLAUDE.md is a symlink to it)
+├── ONBOARDING.md             # guided tour + cheat sheet of the house practices
 ├── STYLE.md                  # writing conventions
 ├── _packages/                # vendored shared style files — NEVER edit (see below)
 ├── _scripts/                 # new-paper.sh, export-paper.sh, texwrap.py, hooks, …
@@ -141,6 +142,22 @@ See [Bibliography workflow](#bibliography-workflow).
    `\bibitem` into a BibTeX entry and replace the block with
    `\bibliographystyle{alpha}\bibliography{../references}`.
 4. Build, fix undefined citations, then retire the old repository.
+
+## Setup check and onboarding
+
+```bash
+make doctor        # read-only check of tools, Git identity, hooks; says how to fix what is missing
+```
+
+New to the repository (or to Git/LaTeX)? [`ONBOARDING.md`](ONBOARDING.md) is a 10-minute guided tour and a
+cheat sheet "old habit → house way". It is meant to be walked through interactively with an AI assistant.
+
+## Working with AI assistants (Copilot, Claude Code, …)
+
+[`AGENTS.md`](AGENTS.md) holds the instructions every assistant follows (`CLAUDE.md` is a symlink to it for tools that
+look for that name; `.github/copilot-instructions.md` points Copilot to it). Besides doing the task, assistants are asked to
+**coach**: explain the house practice behind each correction in a sentence, offer the onboarding tour once per clone,
+and help install or configure tools (`make`, TeX Live, hooks). If you would rather not be coached, tell the assistant.
 
 ## Local setup (macOS and Ubuntu)
 

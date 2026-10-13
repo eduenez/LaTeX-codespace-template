@@ -219,7 +219,14 @@ Use semantic prefixes, then reference with `\cref`/`\Cref`:
 | `lem:` | lemma | | `notn:` | notation |
 | `prop:` | proposition | | `eq:` | equation |
 | `cor:` | corollary | | `fig:` | figure |
-| `conj:` | conjecture | | | |
+| `conj:` | conjecture | | `fact:` | fact |
+| `ques:` | question | | `tab:` | table |
+| `item:` | list item (`\item`) | | `exe:` | exercise |
+| `claim:` | claim (inside a proof) | | | |
+
+Slugs after the prefix are lowercase kebab-case (`thm:main-result`, not `thm:MainResult`).
+Label types the template does not list (axiom, part, appendix, …) take the
+obvious short prefix (`ax:`, `part:`, `app:`) — add it to this table when first used.
 
 Example: `\label{thm:main-result}` → `\cref{thm:main-result}`.
 
@@ -230,24 +237,41 @@ Example: `\label{thm:main-result}` → `\cref{thm:main-result}`.
   `math-bibliography` database, pinned in `_packages/vendor.lock` to record the
   last sync point. Unlike the `.sty` files in `_packages/`, you **may** edit this
   one — add citations directly; the maintainer periodically reconciles them back
-  into the master.
-- Entry keys follow `AuthorLastName:YYYY` or `AuthorOne-AuthorTwo:YYYY`.
-- Cite with `\cite{key}` (use a non-breaking space before it: `Doe~\cite{Doe:2020}`).
-- The bibliography is typeset by `\bibliographystyle{alpha}` + `\bibliography{../references}`
+  into the master. Never create a per-paper `.bib` and never type a reference list by hand
+  (`thebibliography`): the shared file is what keeps keys and corrections consistent.
+- **Entry keys** are `Author-Author:YYYY`, built from the authors' *last names*: a hyphen separates authors and
+  **never appears inside a surname** — write `BenYaacov`, `NashWilliams`, `TomczakJaegermann`, `vonNeumann`, `vanMoerbeke`
+  (accents dropped: `Erdos`). Same author(s) and year: add `a`, `b`, … (`Gowers:1996a`). Undated: `:0000`
+  (e.g. private communications). Reuse an existing entry if the work is already there.
+- Cite with `\cite{key}`. A non-breaking space before it (`Doe~\cite{Doe:2020}`) is recommended.
+- The bibliography is typeset by `\bibliographystyle{amsalpha}` + `\bibliography{../references}`
   at the end of the main `.tex`.
-- BibTeX has no comment syntax and treats the at-sign as an entry start — keep
-  bare at-signs out of `references.bib` header comments.
+- **BibTeX details that bite:** protect capitals and accents that BibTeX would otherwise change or mis-cut — in
+  titles `{B}anach`, `{\"U}ber`; in author names brace an accented letter `Pt{\'a}k`, `{\v{S}}mulian`
+  (otherwise `amsalpha` labels come out as `Pt\63`). BibTeX has no comment syntax and treats the at-sign as an
+  entry start — keep bare at-signs out of header comments.
 
 ## 9. Cross-referencing & macros
 
-- `\cref{...}` auto-generates "Theorem 2.1", "Section 3", …; `\Cref{...}` at the
-  start of a sentence. Never hardcode "Theorem \ref{...}".
+- `\cref{...}` auto-generates "Theorem 2.1", "Section 3", …; a list is `\cref{a,b,c}`. Never hardcode
+  "Theorem \ref{...}". (Papers that keep their own look load `di-cleveref`, which spells the names with capitals.)
+- Declare theorem-like environments that share the theorem counter with `\DiSharedTheorem{lemma}{Lemma}`
+  (from `di-theorem-rudin`) so that `\cref` prints "Lemma" rather than "Theorem".
 - Define macros for repeated notation in the project style file `<paper>.sty`
   (its "Project-specific additions" section) — never in the master `.tex`. See
   "The style file and the vendored `_packages/`" above.
+- **One macro per symbol, shared names.** Blackboard bold is `\XX` (`\NN \ZZ \QQ \RR \CC \FF \MM …`), calligraphic
+  `\cX`, fraktur `\fX`, script `\scrX`, typewriter `\tX` — all provided by `di-alphabets`; do not define a second macro
+  with the same meaning and never reuse these names for something else (`\RR` is always `\mathbb{R}`; use `\cR` for
+  `\mathcal{R}`). Likewise `\Tr` is trace and `\tr` is a tree, `\ind` is independence (`di-logic`), `\spn` is span
+  (`di-quantum`). Before inventing a macro, look in `_packages/` and in `<paper>.sty`; generic notation belongs upstream in
+  `LaTeX-shared-files`.
+- **Modifiers take braced arguments:** `\mathcal{X}`, `\tilde{X}`, `\hat{x}`, `\mathbf{1}` — not `\mathcal X`
+  (`\tilde\alpha` is tolerated). Write `\RR`, not `\mathbb{R}`, where the shared name exists.
 
 ```latex
-\newcommand{\RR}{\mathbb{R}}
+% in <paper>.sty — only notation that is specific to this paper:
+\newcommand{\Gal}{\operatorname{Gal}}
 \DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
 ```
 

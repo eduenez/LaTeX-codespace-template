@@ -32,9 +32,9 @@ _export/
 *-converted-to.*
 *.ps
 *.eps
-*.pdf
-# ...but keep PDF figures inside a paper's figures/ directory
-!*/figures/**/*.pdf
+# built PDFs (paper directory top level and repo root); PDFs nested deeper are figures and are tracked
+/*.pdf
+/*/*.pdf
 
 # ── Bibliography auxiliary files ─────────────────────────────────────────────
 *.bbl
