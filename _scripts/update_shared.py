@@ -59,6 +59,13 @@ try:
             loc = ns['parse'](open(os.path.join(root, 'references.bib'), errors='replace').read())
             upe = ns['parse'](open(os.path.join(d, 'references.bib'), errors='replace').read())
             only_loc = [k for k in loc if k not in upe]
+            # a "local-only" entry that is the same work (title+year) as an upstream entry was renamed upstream: superseded, drop it
+            _t = lambda e: re.sub(r'[^a-z0-9]+', '', e[1].get('title', '').lower()) + e[1].get('year', '')
+            up_titles = {_t(v) for v in upe.values()}
+            superseded = [k for k in only_loc if _t(loc[k]) in up_titles]
+            if superseded:
+                print('  superseded by renamed upstream entries (dropped): ' + ', '.join(superseded))
+            only_loc = [k for k in only_loc if k not in superseded]
             changed = [k for k in set(loc) & set(upe) if not ns['same'](loc[k], upe[k])]
             print(f'  references.bib: {len(set(upe) - set(loc))} new upstream, {len(only_loc)} local-only kept, {len(changed)} locally edited')
             if changed and not force:
