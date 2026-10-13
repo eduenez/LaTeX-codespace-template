@@ -65,10 +65,12 @@
         "bibtex"
     ],
     "github.copilot.enable": {
+        "*": true,
+        "plaintext": true,
+        "markdown": false,
+        "scminput": false,
         "latex": true,
-        "markdown": true,
-        "bibtex": true,
-        "plaintext": true
+        "bibtex": true
     },
     "latex-utilities.countWord.path": "texcount",
     "latex-utilities.countWord.args": [
