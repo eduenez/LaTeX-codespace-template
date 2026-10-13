@@ -19,9 +19,9 @@ out="${2:-$repo/_export/$paper}"
 
 rm -rf "$out"
 mkdir -p "$out"
-# Sources and assets; skip build products and the repo-relative latexmkrc.
+# Sources and assets; skip build products and the repo-relative latexmkrc and Makefile.
 rsync -a \
-  --exclude '_build' --exclude 'latexmkrc' --exclude '*.pdf.bak' \
+  --exclude '_build' --exclude 'latexmkrc' --exclude 'Makefile' --exclude '*.pdf.bak' \
   --exclude '*.aux' --exclude '*.log' --exclude '*.bbl' --exclude '*.blg' \
   --exclude '*.out' --exclude '*.toc' --exclude '*.fls' --exclude '*.fdb_latexmk' \
   --exclude '*.synctex.gz' --exclude "$paper.pdf" \

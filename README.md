@@ -67,7 +67,8 @@ Rules of the road:
    `PAPER*.tex`/`PAPER.sty` to `my-paper*`, and replace the word `PAPER` by `my-paper`
    inside them (find-and-replace in VS Code). Also create `my-paper/latexmkrc`
    containing the two lines
-   `@default_files = ('my-paper.tex');` and `do '../latexmkrc';`.
+   `@default_files = ('my-paper.tex');` and `do '../latexmkrc';`, and `my-paper/Makefile`
+   containing the one line `include ../_scripts/paper.mk` (optional: only for `make`).
 4. Edit `my-paper/my-paper.tex` and `my-paper/my-paper.sty`. Saving a `.tex` in VS Code builds it.
 
 ## Building a paper
@@ -76,9 +77,10 @@ Four equivalent ways; the PDF appears next to the source and intermediate files
 go to `my-paper/_build/` (both gitignored).
 
 ```bash
-make my-paper              # from the repo root
-make build                 # every paper in the repository
-cd my-paper && latexmk     # from inside the paper's directory
+cd my-paper && make        # the usual way: work inside the paper's directory (make help lists the targets)
+cd my-paper && latexmk     # the same without make
+make my-paper              # from the repo root, if you prefer
+make build-all FORCE=1     # every paper (slow, rarely needed, deliberately guarded)
 # VS Code: just save the .tex file (LaTeX Workshop builds on save)
 ```
 
@@ -229,7 +231,7 @@ Then, from the repo root:
 
 ```bash
 make install-hooks   # advisory pre-commit hook (see below)
-make build           # compile every paper end to end
+make build-all FORCE=1   # compile every paper end to end (optional; slow)
 ```
 
 ## Editor setup (VS Code)
@@ -331,7 +333,7 @@ This template deliberately does **not** block collaborators on formatting:
   the command above to refresh it.
 - **CI** ([lint-and-build.yml](.github/workflows/lint-and-build.yml)) — on push/PR
   to `main`: line-width and `chktex` checks are advisory (`continue-on-error`);
-  only `$$`/`\eqnarray` are hard-gated. The build job runs `make build`, compiling every
+  only `$$`/`\eqnarray` are hard-gated. The build job runs `make build-all FORCE=1`, compiling every
   paper (auto-discovered) and uploads the PDFs as artifacts.
 
 ## Adding chapters (monograph)

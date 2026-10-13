@@ -39,3 +39,23 @@ $emulate_aux = 1;
 # Run bibtex from the paper's directory (not from inside _build/), so that
 # \bibliography{../references} resolves exactly as in a manual run.
 $bibtex_fudge = 0;
+
+# Default documents. A paper's own latexmkrc normally names its main file(s) with @default_files BEFORE loading
+# this file. If it does not (or there is none), build every master of the current directory: each .tex that has an
+# uncommented \documentclass (standalone figure documents excepted). So a directory with several masters, or one
+# whose master was added later, needs no configuration; \include'd children are never built directly.
+unless (@default_files) {
+  if (opendir(my $dh, '.')) {
+    foreach my $f (sort grep { /\.tex$/ } readdir($dh)) {
+      open(my $fh, '<', $f) or next;
+      my $master = 0;
+      while (my $l = <$fh>) {
+        next if $l =~ /^\s*%/;
+        if ($l =~ /^[^%]*\\documentclass/) { $master = ($l !~ /\{standalone\}/); last; }
+      }
+      close($fh);
+      push @default_files, $f if $master;
+    }
+    closedir($dh);
+  }
+}

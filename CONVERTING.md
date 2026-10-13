@@ -81,7 +81,7 @@ junk pattern rather than importing megabytes.
 
 In `<name>/`:
 
-1. `latexmkrc` with two lines: `@default_files = ('<name>.tex');` and `do '../latexmkrc';` (builds only the main file).
+1. `latexmkrc` with two lines: `@default_files = ('<name>.tex');` and `do '../latexmkrc';` (builds only the main file); and a one-line **`Makefile`**: `include ../_scripts/paper.mk`. Run `python3 _scripts/tex_vars.py --apply <name>` to add the Emacs file variables (`TeX-master: t` in masters, the master's name in children).
 2. Move the preamble (everything before `\begin{document}` except `\documentclass`, `\usepackage{<name>}` and the metadata
    `\title … \keywords`) into **`<name>.sty`**; the main file keeps: banner comment (copy from `_templates/`),
    `\makeatletter\def\input@path{{../_packages/}{_packages/}}\makeatother`, `\usepackage{<name>}`, metadata, `\begin{document}`.
@@ -89,7 +89,7 @@ In `<name>/`:
    `di-cleveref`, then `di-theorem-rudin` (cleveref **before** theorem definitions).
 3. Keep class files and local `.bst` next to the main file. A class that breaks `latexmk` (see §9) gets a workaround in the
    paper's own `latexmkrc`, not in the shared one.
-4. Build: `make <name>` and the manual `pdflatex; bibtex; pdflatex; pdflatex` in `<name>/`; both must work. Compare with the
+4. Build: `make` in `<name>/` (or `make <name>` at the root) and the manual `pdflatex; bibtex; pdflatex; pdflatex` in `<name>/`; both must work. Compare with the
    baseline (§7). Commit: "Make <name> build in the multi-paper repository".
 
 ## 4. Notation (macros)

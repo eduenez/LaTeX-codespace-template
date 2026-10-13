@@ -1,7 +1,7 @@
 name: LaTeX Lint & Build
 
 # The fast lint job runs on every push. The heavy build job (installs texlive-full on the runner: several GB, ~10 minutes)
-# is MANUAL ONLY: Actions -> "LaTeX Lint & Build" -> Run workflow. Papers are built locally (make build).
+# is MANUAL ONLY: Actions -> "LaTeX Lint & Build" -> Run workflow. Papers are built locally (make build-all FORCE=1).
 on:
   push:
     branches: [main]
@@ -92,7 +92,7 @@ jobs:
       # a main .tex (one with \documentclass). Run from inside the paper dir,
       # exactly as a user would.
       - name: Build all papers
-        run: make build
+        run: make build-all FORCE=1
 
       - name: Upload PDFs
         uses: actions/upload-artifact@v4

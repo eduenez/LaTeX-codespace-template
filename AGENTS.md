@@ -22,7 +22,7 @@ house conventions, and help the person you are working with adopt those conventi
 - `<paper>/` — one directory per manuscript (directory names never start with `_` or `.`). It contains
   `<paper>.tex` (main file: `\documentclass`, `\usepackage{<paper>}`, metadata only), `<paper>.sty` (ALL
   packages, macros and theorem environments of that paper), chapter files (books), a two-line `latexmkrc`
-  (builds the main file, loads `../latexmkrc`), and the paper's figures, data and scripts.
+  (builds the main file, loads `../latexmkrc`), a one-line `Makefile` (`include ../_scripts/paper.mk`), and the paper's figures, data and scripts.
   Existing directories use the pattern `book_<topic>/<topic>_book.tex` for books.
 - `references.bib` — the ONE shared bibliography at the repo root (a snapshot of the group's master
   `math-bibliography`; vendored-but-editable).
@@ -34,7 +34,13 @@ house conventions, and help the person you are working with adopt those conventi
 - Directories starting with `_` are infrastructure, not papers. There are **no submodules** (students on
   Windows and Git beginners use this repository); symlinks are not used for LaTeX files.
 
-## 2. Commands (run from the repository root)
+## 2. Commands
+
+Work **inside the paper's directory**: its `Makefile` offers `make` (build the default document), `make all` (every master
+there: a master is a `.tex` with an uncommented `\documentclass`; children never build alone), `make NAME.pdf`, `make watch`,
+`make clean`, `make format|check|lint|export` (this paper only), and the repository-wide chores. Plain `latexmk` there does the
+same as `make`. At the repository root the same targets exist with `P=<paper>`; anything that would act on **all** papers
+(`make build-all`, and `format`/`lint` without `P=`) needs `FORCE=1` — never use it unless the user asks for it.
 
 | Command | What it does |
 |---|---|
@@ -43,7 +49,8 @@ house conventions, and help the person you are working with adopt those conventi
 | `make bib-diff` | compare `references.bib` with the upstream master: entries to propose upstream, entries edited locally |
 | `make update-shared` | dry run: what changed upstream (shared packages and bibliography); `python3 _scripts/update_shared.py --apply` updates |
 | `make new P=<name> TYPE=article\|monograph` | create a paper from a template |
-| `make <paper>` / `make build` | build one paper / all papers (PDF next to the source, aux files in `_build/`) |
+| `make` (in `<paper>/`) or `make <paper>` (root) | build one paper (PDF next to the source, aux files in `_build/`) |
+| `make build-all FORCE=1` | build every paper (guarded; rarely needed) |
 | `make format [P=<paper>]` | typography + semantic line wrapping + indentation (idempotent) |
 | `make check [P=<paper>]` | dry run: report what `make format` would change |
 | `make lint [P=<paper>]` | chktex |
@@ -52,13 +59,15 @@ house conventions, and help the person you are working with adopt those conventi
 
 Equivalent without `make`: `cd <paper> && latexmk`, or the manual
 `pdflatex <paper>; bibtex <paper>; pdflatex <paper>; pdflatex <paper>` (works without any configuration).
-Never run `latexmk` at the repository root. Built PDFs and `_build/` are git-ignored: never commit them.
+Never run `latexmk` at the repository root.
+**Emacs file variables.** Every `.tex` ends with a `%%% Local Variables:` block: `TeX-master: t` in a master, `TeX-master: "<master>"`
+in a child. Keep them when editing; `python3 _scripts/tex_vars.py [--apply] <paper>` adds missing blocks (never alters existing ones). Built PDFs and `_build/` are git-ignored: never commit them.
 
 ## 3. Rules for editing
 
 1. **Stay in the paper you were asked about.** Shared infrastructure (`latexmkrc`, `Makefile`, `_scripts/`,
    `.vscode/`, CI, templates) affects every paper: change it only when asked, keep it backward compatible,
-   and verify with `make build`.
+   and verify with `make <paper>` for a few papers (`make build-all FORCE=1` only if asked).
 2. **Preamble discipline.** No `\usepackage`, `\newcommand`, `\newtheorem` in the main `.tex`; they go in
    `<paper>.sty` ("Project-specific additions"). Keep the `\makeatletter\def\input@path{{../_packages/}{_packages/}}\makeatother`
    line and `\bibliography{../references}` intact (the export script rewrites them).

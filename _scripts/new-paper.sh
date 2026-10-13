@@ -5,7 +5,7 @@
 #   (or:  make new P=<name> TYPE=article|monograph)
 #
 # Copies _templates/<type>/ to ./<name>/, renaming PAPER -> <name>, and adds a
-# two-line latexmkrc so that plain `latexmk` works inside the new directory.
+# two-line latexmkrc (plain `latexmk` works inside the new directory) and a one-line Makefile (`make`).
 # No symlinks are created: the paper reaches the shared _packages/ and
 # references.bib by relative path (../).
 set -euo pipefail
@@ -40,7 +40,9 @@ for f in "$src"/*; do
 done
 # @default_files: build only the main file (not the \include'd chapter files).
 printf "@default_files = ('%s.tex');\ndo '../latexmkrc';\n" "$name" > "$dest/latexmkrc"
+# Per-paper Makefile: `make` inside the directory builds it (see _scripts/paper.mk).
+printf "include ../_scripts/paper.mk\n" > "$dest/Makefile"
 
 echo "Created $name/ ($type). Next:"
 echo "  edit $name/$name.tex and $name/$name.sty"
-echo "  build:  make $name      (or: cd $name && latexmk)"
+echo "  build:  make $name      (or: cd $name && make    or    latexmk)"
