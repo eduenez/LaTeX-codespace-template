@@ -239,3 +239,10 @@ It tags `pre-consolidation` (last real state) and optionally `consolidated-snaps
 prepends a banner to every top-level `.md`, commits on `main`, pushes main and tags, and can delete a conversion branch. It never
 rewrites history. Archiving on GitHub (Settings → Archive) needs an admin: ask the owner. Tell the collaborators where the paper
 lives now and how to move uncommitted work (the notice says it).
+
+## 11. Keep the master list of consumers current
+
+A repository that vendors shared files or the master bibliography must be registered in `LaTeX-shared-files/vendor-registry.json`
+(`consumers`; consolidated repositories go to `retired`) so that future changes to the shared files or to bibliography keys reach it.
+After editing the registry run `python3 _scripts/consumers.py --write` in `LaTeX-shared-files` (regenerates `CONSUMERS.md` there and in
+`math-bibliography`) and commit both. `python3 _scripts/consumers.py` also lists repositories that vendor shared files but are not registered.
