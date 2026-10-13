@@ -246,3 +246,10 @@ A repository that vendors shared files or the master bibliography must be regist
 (`consumers`; consolidated repositories go to `retired`) so that future changes to the shared files or to bibliography keys reach it.
 After editing the registry run `python3 _scripts/consumers.py --write` in `LaTeX-shared-files` (regenerates `CONSUMERS.md` there and in
 `math-bibliography`) and commit both. `python3 _scripts/consumers.py` also lists repositories that vendor shared files but are not registered.
+
+## 12. Repositories that still use submodules (`sty/`, `bib/`)
+
+`python3 _scripts/migrate/submodules_to_vendored.py <repo>` converts a repository that links LaTeX-shared-files and math-bibliography as git
+submodules to the vendored model on a new local branch: baseline build, submodules removed, `_packages/` and `references.bib` vendored (with
+`vendor.lock` checksums and the `_scripts/` tools), `latexmkrc`/preambles/`\bibliography` paths adapted, cite keys renamed, rebuilt and compared. It
+does not reorganise the papers (they stay where they are); consolidating them into paper directories is a separate step (this playbook).
