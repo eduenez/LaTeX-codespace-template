@@ -23,7 +23,7 @@ LATEXMK := latexmk $(if $(wildcard latexmkrc),,-r ../latexmkrc)
 
 .DEFAULT_GOAL := pdf
 .PHONY: pdf PDF compile article all watch clean distclean help FORCE \
-        format reflow fashion wrap indent sep check lint export doctor vendor-check bib-diff update-shared install-hooks
+        arxiv format reflow fashion wrap indent sep check lint export doctor vendor-check bib-diff update-shared install-hooks
 
 ## pdf: build the default document of this directory (synonyms: PDF, compile, article)
 pdf PDF compile article:
@@ -40,6 +40,10 @@ all:
 	@test -f $*.tex || { echo "no $*.tex in $(PAPER)/"; exit 1; }
 	@$(LATEXMK) $*.tex
 FORCE:
+
+## arxiv: one-file submission bundle <paper>/arxiv/<main>-arxiv-vN.zip (.tex + .bbl; verified); V=<n> sets the version
+arxiv:
+	@python3 $(ROOT)/_scripts/arxiv_bundle.py $(PAPER) $(if $(V),--version $(V)) $(ARXIV_ARGS)
 
 ## watch: rebuild the default document whenever a source changes
 watch:
@@ -65,6 +69,7 @@ help:
 	@echo "  make NAME.pdf   build one master                  make watch     rebuild on save"
 	@echo "  make format     typography + semantic wrapping    make check     dry run of format"
 	@echo "  make lint       chktex                            make export    self-contained copy (arXiv)"
+	@echo "  make arxiv      one-file arXiv bundle (zip)       "
 	@echo "  make clean      remove intermediates              make distclean also remove the PDFs"
 	@echo "  make doctor | vendor-check | bib-diff | update-shared   repository-wide chores"
 	@echo "Plain 'latexmk' in this directory does the same as 'make'."

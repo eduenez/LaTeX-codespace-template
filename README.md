@@ -145,6 +145,21 @@ See [Bibliography workflow](#bibliography-workflow).
    `\bibliographystyle{alpha}\bibliography{../references}`.
 4. Build, fix undefined citations, then retire the old repository.
 
+## Submitting to arXiv
+
+```bash
+cd my-paper && make arxiv            # -> my-paper/arxiv/my-paper-arxiv-v1.zip   (make arxiv V=2 for a revision)
+```
+
+The zip holds exactly two files: **one `.tex`** and the **`.bbl`**. The tool inlines, verbatim, every local package (the
+paper's `.sty` and the vendored `di-*.sty`, each once, with a `%#` banner naming its origin) and `\input`'d files; it
+removes the repository plumbing (`\input@path`, `../references`) and all comments **except** the `%#` banners of
+[STYLE.md §4](STYLE.md) (so commented-out code and workflow notes never reach arXiv). Then it compiles the bundle in an empty
+directory with plain `pdflatex` and checks that the pages and text equal the normal build. The zip is reproducible
+(fixed timestamps) and never overwritten. After you have actually submitted: `git add` the zip, commit, and tag
+`arxiv-<paper>-v1`; the tag is then the permanent record of what arXiv received. Figures are added to the zip as files;
+`\include` is not supported (use `\input`).
+
 ## Setup check and onboarding
 
 ```bash

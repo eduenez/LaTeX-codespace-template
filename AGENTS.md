@@ -54,6 +54,7 @@ same as `make`. At the repository root the same targets exist with `P=<paper>`; 
 | `make format [P=<paper>]` | typography + semantic line wrapping + indentation (idempotent) |
 | `make check [P=<paper>]` | dry run: report what `make format` would change |
 | `make lint [P=<paper>]` | chktex |
+| `make arxiv [V=n]` (in `<paper>/`) | one-file arXiv bundle `<paper>/arxiv/<main>-arxiv-vN.zip` (.tex + .bbl, packages inlined, comments stripped except `%#` banners, verified); commit it and tag `arxiv-<paper>-vN` only when the user has submitted |
 | `make export P=<paper>` | self-contained copy in `_export/<paper>/` (arXiv, submission) |
 | `make install-hooks` | install the advisory pre-commit hook |
 
