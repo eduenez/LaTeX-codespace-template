@@ -3,8 +3,10 @@
 
 Subcommands (all take FILE... and are dry-run unless --write is given):
   unwrap    join non-semantic hard line breaks inside prose paragraphs (run BEFORE texwrap.py). Only plain body text and
-            RECOGNISED prose environments (theorems, proof, lists, abstract, ... see PROSE_ENVS; theorem-like environments declared in the
-            paper's .sty are detected; add others with --prose-env NAME) are joined; every other environment is left untouched and reported
+            RECOGNISED prose environments are joined: PROSE_ENVS (abstract, lists, proof, theorem-like ...), theorem-like environments
+            declared in the paper's .sty, and EVERY environment defined by our style code (\\newenvironment, \\NewDocumentEnvironment,
+            \\newtcolorbox ... in the paper's .sty or _packages/*.sty). Exceptions: --skip-env NAME or texfix.json
+            {"prose_envs": [...], "skip_envs": [...]}. Any other environment is left untouched and reported
   macros    --map map.json         rename macros (simultaneous, word-bounded, comments skipped)
   mods      font/accent modifiers: \\mathcal X -> \\mathcal{X}, \\hat x -> \\hat{x}
   bbb       \\mathbb{R} / \\mathbb R -> \\RR  (letters present in di-alphabets)
@@ -15,25 +17,56 @@ import argparse, json, re, sys, difflib, collections
 
 NOJOIN_ENVS = {'equation', 'equation*', 'align', 'align*', 'gather', 'gather*', 'multline', 'multline*', 'eqnarray', 'eqnarray*',
                'tabular', 'tabular*', 'array', 'tikzpicture', 'verbatim', 'lstlisting', 'table', 'table*', 'matrix', 'pmatrix',
-               'bmatrix', 'cases', 'figure', 'figure*', 'thebibliography', 'tikzcd', 'split', 'displaymath', 'alignat', 'alignat*', 'flalign', 'flalign*'}
+               'bmatrix', 'cases', 'figure', 'figure*', 'thebibliography', 'tikzcd', 'split', 'displaymath', 'alignat', 'alignat*', 'flalign', 'flalign*', 'titlepage', 'smallmatrix', 'scope', 'pgfpicture', 'axis', 'minted', 'algorithm', 'algorithmic',
+               'algorithm2e', 'longtable', 'tabularx', 'tabulary', 'eqnarray*', 'xy', 'picture', 'tcbraster', 'Bmatrix', 'vmatrix', 'Vmatrix'}
 PROSE_ENVS = {'document', 'abstract', 'center', 'flushleft', 'flushright', 'minipage', 'itemize', 'enumerate', 'description', 'proof', 'quote', 'quotation', 'verse_no',
               'theorem', 'proposition', 'corollary', 'lemma', 'fact', 'definition', 'example', 'examples', 'remark', 'remarks',
               'question', 'conjecture', 'claim', 'axiom', 'notation', 'exercise', 'exercises', 'solution', 'problem', 'observation'}
 THM_DECL = re.compile(r'\\(?:newtheorem\*?|declaretheorem(?:\[[^\]]*\])?|DiSharedTheorem|newaliascnt|spnewtheorem\*?)\s*\{([A-Za-z*]+)\}')
+ENV_DEF = re.compile(r'\\(?:newenvironment|renewenvironment|NewDocumentEnvironment|RenewDocumentEnvironment|ProvideDocumentEnvironment|'
+                     r'DeclareDocumentEnvironment|newtcolorbox|renewtcolorbox|NewTColorBox|DeclareTColorBox|tcolorboxenvironment|newmdenv|'
+                     r'newmdtheoremenv|newtheoremstyle_no)\*?\s*(?:\[[^\]]*\]\s*)*\{\s*([A-Za-z*]+)\s*\}')
+
+
+def style_files(path):
+    import glob, os
+    d = os.path.dirname(os.path.abspath(path))
+    return [path] + glob.glob(d + '/*.sty') + glob.glob(d + '/../_packages/*.sty') + glob.glob(d + '/_packages/*.sty')
 
 
 def detect_theorem_envs(path):
-    """Environment names declared as theorem-like in the file itself, in sibling .sty files, and in ../_packages/*.sty."""
-    import glob, os
-    d = os.path.dirname(os.path.abspath(path))
-    cands = [path] + glob.glob(d + '/*.sty') + glob.glob(d + '/../_packages/di-theorem-rudin.sty') + glob.glob(d + '/_packages/di-theorem-rudin.sty')
+    """Theorem-like environments declared in the file itself, in sibling .sty files, and in ../_packages/*.sty."""
     found = set()
-    for f in cands:
+    for f in style_files(path):
         try:
             found |= set(THM_DECL.findall(open(f, errors='replace').read()))
         except OSError:
             pass
     return {n.rstrip('*') for n in found}
+
+
+def detect_style_envs(path):
+    """Environments DEFINED by our own style code (file preamble, sibling .sty, vendored _packages/*.sty): prose by default."""
+    found = set()
+    for f in style_files(path):
+        try:
+            found |= set(ENV_DEF.findall(open(f, errors='replace').read()))
+        except OSError:
+            pass
+    return {n.rstrip('*') for n in found}
+
+
+def load_config(path):
+    """texfix.json in the file's directory or any parent (up to the repository root): {"prose_envs": [...], "skip_envs": [...]}."""
+    import os, json
+    d = os.path.dirname(os.path.abspath(path))
+    while True:
+        c = os.path.join(d, 'texfix.json')
+        if os.path.exists(c):
+            return json.load(open(c))
+        if os.path.exists(os.path.join(d, '.git')) or os.path.dirname(d) == d:
+            return {}
+        d = os.path.dirname(d)
 
 
 unknown_envs = collections.Counter()
@@ -98,9 +131,10 @@ def unwrap(text, prose=frozenset()):
             else:
                 in_display = False
         now_nojoin = nojoin_now()
-        for e in env_stack:
-            if e.rstrip('*') not in prose and e not in NOJOIN_ENVS and e != 'document':
-                unknown_envs[e] += 1
+        if not any(e in NOJOIN_ENVS for e in env_stack) and not in_display and s:
+            for e in env_stack:
+                if e.rstrip('*') not in prose and e not in NOJOIN_ENVS and e != 'document':
+                    unknown_envs[e] += 1
         if not in_doc or was_nojoin or now_nojoin or not s:
             flush()
             out.append(line)
@@ -277,14 +311,21 @@ def main():
     ap.add_argument('--write', action='store_true')
     ap.add_argument('--labelmap-out')
     ap.add_argument('--prose-env', action='append', default=[], help='unwrap: treat this environment as running prose (repeatable)')
+    ap.add_argument('--skip-env', action='append', default=[], help='unwrap: never touch the lines of this environment (repeatable)')
     a = ap.parse_args()
     texts = {f: open(f, encoding='utf-8').read() for f in a.files}
     missing = set()
     if a.cmd == 'unwrap':
         new = {}
         for f, t in texts.items():
-            prose = set(PROSE_ENVS) | detect_theorem_envs(f) | set(a.prose_env)
+            cfg = load_config(f)
+            style_defined = detect_style_envs(f)
+            skip = set(cfg.get('skip_envs', [])) | set(a.skip_env)
+            extra = set(cfg.get('prose_envs', [])) | set(a.prose_env)
+            prose = ((PROSE_ENVS | detect_theorem_envs(f) | style_defined) - NOJOIN_ENVS | extra) - skip
             new[f] = unwrap(t, prose)
+            print(f'unwrap: {f}: environments defined in our style files, treated as prose: {sorted(style_defined - NOJOIN_ENVS - skip) or "none"}'
+                  + (f'; left alone by configuration: {sorted(skip)}' if skip else ''), file=sys.stderr)
         if unknown_envs:
             print('unwrap: environments NOT recognised as prose — their lines were left untouched:', file=sys.stderr)
             for e, n in unknown_envs.most_common():

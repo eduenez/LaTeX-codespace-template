@@ -149,17 +149,23 @@ Follow `STYLE.md` §9 and the approved macro map of the consolidation (`AGENTS.m
      and theorem bodies are joined like any prose.
    - **What it leaves alone:** the preamble; blank lines; comment lines and lines ending in a `%` comment; lines ending in `\\`;
      lines that start with `\begin{`/`\end{`/`\[`/`\]`, a sectioning command, `\label`, `\caption`, `\bibitem`, …; display math
-     (`equation`, `align`, `\[ … \]`, matrices, `cases`); `tabular`, `table`, `figure`, `tikzpicture`, `verbatim`, `thebibliography`;
-     and — the safe default — **every environment it does not recognise as running prose** (code, `algorithm`, `timeline`, custom boxes,
-     custom tables, title pages…). Line breaks there are usually meaningful, so they are never touched.
-   - **Which environments count as prose:** plain body text, `abstract`, lists (`itemize`/`enumerate`/`description`), `proof`, `quote`,
-     `center`/`minipage`/`flush*`, the usual theorem-like environments, and any theorem-like environment *declared* in the file, in a
-     sibling `.sty` or in `di-theorem-rudin` (`\newtheorem`, `\declaretheorem`, `\DiSharedTheorem`, `\newaliascnt`).
-   - **Unrecognised environments are reported, not guessed:** at the end the tool prints each one with its line count and the exact
-     flag to use, e.g. `roadmapbox (81 lines) -> if it is running prose add: --prose-env roadmapbox`. Look at each one: if its content
-     is ordinary paragraphs (a paper-specific `tcolorbox` "summary" or "remark" box), re-run with `--prose-env roadmapbox` (repeatable);
-     if it is code, an algorithm, a timeline or anything layout-sensitive, leave it alone. When in doubt leave it alone — an
-     un-reflowed environment costs nothing, a botched one costs a careful repair.
+     (`equation`, `align`, `\[ … \]`, matrices, `cases`); `tabular`/`table`/`figure`, `tikzpicture` and friends (`scope`, `axis`, …),
+     `verbatim`/`lstlisting`/`minted`/`algorithm`, `titlepage`, `thebibliography`; and every environment it does not recognise
+     as running prose (see below).
+   - **What counts as prose (the defaults):** plain body text; `abstract`; lists; `proof`; `quote`; `center`/`minipage`/`flush*`;
+     the usual theorem-like environments; any theorem-like environment *declared* in the file, a sibling `.sty` or `di-theorem-rudin`
+     (`\newtheorem`, `\declaretheorem`, `\DiSharedTheorem`, `\newaliascnt`); and **every environment defined by our own style code** —
+     `\newenvironment`, `\NewDocumentEnvironment`, `\newtcolorbox`, `\tcolorboxenvironment`, … in the paper's preamble or `.sty` or in the
+     vendored `_packages/*.sty` (`timeline`, a `roadmapbox`, a `keygame` box): environments we define are text unless said otherwise.
+     The tool prints which environments it treated as prose for each file.
+   - **Exceptions and additions (configuration):** `--skip-env NAME` leaves an environment untouched even if our style defines it
+     (e.g. one that wraps code or a hand-aligned layout); `--prose-env NAME` adds one (e.g. a package environment). Both are repeatable.
+     For a permanent setting put a file `texfix.json` in the paper directory or any parent directory:
+     `{"prose_envs": ["summarybox"], "skip_envs": ["asciiart"]}`.
+   - **Unrecognised environments are reported, not guessed:** an environment that is neither known non-prose, nor defined by our style
+     code, nor configured (typically a package environment such as a bare `tcolorbox`) is left untouched, and at the end the tool prints
+     it with its line count and the flag to opt in, e.g. `tcolorbox (3 lines) -> if it is running prose add: --prose-env tcolorbox`.
+     When in doubt leave it alone — an un-reflowed environment costs nothing, a botched one costs a careful repair.
    - **Other limits (check by hand):** the tool is line-based. A paragraph with inline `\\` or `\newline` stays broken there;
      prose inside `\caption{…}` continues on several lines but is not joined to the `\caption` line itself. Look at the diff of tables,
      figures, tikz and long displays before writing.
