@@ -1,0 +1,5 @@
+# .mailmap — one canonical name/e-mail per person, so that git log/blame/shortlog do not split people
+José Iovino <jose.iovino@utsa.edu> <joseiovino@gmail.com>
+José Iovino <jose.iovino@utsa.edu> Jose Iovino <jose.iovino@utsa.edu>
+Eduardo Dueñez <eduardo@gibran.ai> <eduenez@gmail.com>
+Eduardo Dueñez <eduardo@gibran.ai> eduenez <eduenez@gmail.com>
