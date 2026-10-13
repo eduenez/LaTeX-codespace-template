@@ -87,9 +87,12 @@ Never run `latexmk` at the repository root. Built PDFs and `_build/` are git-ign
 If you are asked to bring an outside manuscript into this repository — a one-off repository, a loose `.tex`, an Overleaf
 export, a co-author's repository that follows none of these conventions — **follow `CONVERTING.md` step by step**. In outline:
 
-1. **Decide with the user first**: source and branch, target repository, the new directory/file names (underscore words,
-   proper names capitalised, `book_<topic>/<topic>_book.tex`), the printed-output policy (the paper keeps its own look; only
-   bibliography formatting, unified symbols and approved typo fixes may change the print), and who must be told.
+1. **Propose, don't interrogate.** Work out a complete house-style proposal yourself — new directory and file names
+   (`python3 _scripts/migrate/propose_names.py`; e.g. `Everything/Everything.tex` → `book_everything/everything_book.tex`), target
+   repository, the printed-output policy (the paper keeps its own look; only bibliography formatting, unified symbols and approved
+   typo fixes may change the print) — and present it as one table: *"I will use these unless you change something."* Users
+   should not have to know the conventions; every decision is an **overridable default**. Ask open questions only where no
+   sensible default exists.
 2. **Inventory** the source read-only; build it as it is and keep that PDF as the *baseline* (record pre-existing errors).
 3. **Import with history**: `python3 _scripts/migrate/import_repo.py <source> --dir <name> --rename old:new`
    (never rewrite the source; authors and dates are preserved; junk is left behind).
@@ -98,7 +101,7 @@ export, a co-author's repository that follows none of these conventions — **fo
    `references.bib`, house-style keys, `\cite` keys renamed) → unwrap, `make format` → labels and `\cref` → banners.
 5. **Verify after every step** with `pdfdiff.py` against the baseline: same page count; text differences only for the date,
    bibliography formatting, unified symbols and approved fixes.
-6. **Do not decide silently**: bring the questions in `CONVERTING.md` §8 to the user; never delete dead code or restructure
+6. **Do not decide silently**: put the decisions of `CONVERTING.md` §8 in front of the user, each with your default; never delete dead code or restructure
    content unasked; never push or force-push unless asked.
 7. **Retire the old repository** with `_scripts/migrate/obsolete_notice.py` once the user has reviewed the result.
 

@@ -13,22 +13,31 @@ All helper scripts are in [`_scripts/migrate/`](_scripts/migrate): `import_repo.
 rewrites), `macros.py` (macro inventory), `pdfdiff.py` (compare PDFs), `obsolete_notice.py` (retire the old repository),
 `idxfilter.py` (helper of `import_repo.py`). Each prints its own usage when run without arguments.
 
-## 0. Before you touch anything — decide with the user
+## 0. Before you touch anything — propose defaults, let the user override
 
-Ask (and write the answers down in the commit message of the import):
+**Principle: never ask the user to invent house-style answers; propose them.** The people whose repositories you convert (Iovino,
+students, collaborators) usually do not know the conventions and should not have to. Work out a complete, conforming
+*proposal* yourself, show it as one compact table, and say *"I will use these unless you change something"* — the user accepts
+with one word or overrides individual entries. Open questions ("what should the directory be called?") are for the rare
+decisions that have no sensible default (§8).
 
-1. **Which repository/document, which branch, and who owns it?** Do you have write access to the old repository (needed
-   for the obsolescence notice, §10)? If not, you can still import; tell the owner what to do.
-2. **Which target repository?** One of the multi-paper repositories (here `QuantumDI` = Dueñez–Iovino papers, `QuantumTeam`
-   = team papers and books), or a new one.
-3. **New names.** Directory and main file use the same name: lowercase words joined by underscores, proper names capitalised
-   (`Soler_axioms`, `hidden_variables`); a series gets a common prefix and index (`Qbipartite_2_NIP`); books are
-   `book_<topic>/<topic>_book.tex`. Chapter files `<name>_<n>_<topic>.tex` or keep an established subdirectory scheme.
-   Never reuse a name that exists. Propose names; wait for approval before the import (renaming later breaks history links).
-4. **Printed output policy.** Default (used so far): the paper keeps *its own look* (fonts, class, theorem styles). Only these
-   printed changes are acceptable: bibliography formatting changes forced by BibTeX automation; unified glyphs for symbols
-   with identical meaning; obvious typo fixes the user approves. Anything else: ask first.
-5. **Collaborators.** Who else edits the old repository? They must be told about the move (§10) before it is retired.
+1. **Gather the facts yourself** (read-only): source URL, default branch, owner, whether you can push there, other
+   contributors (`git shortlog -sn`), class and size of each document, whether it builds. Ask the user only what you cannot find out:
+   the target repository if it is not obvious from the authors (`QuantumDI` = Dueñez–Iovino papers; `QuantumTeam` = team papers
+   and books), and who must be told about the move.
+2. **Propose the new names** with `python3 _scripts/migrate/propose_names.py <source-dir> [--series PREFIX]`. Rules it applies:
+   lowercase words joined by underscores, acronyms and proper names keep their capitals (`Soler_axioms`, `Qbipartite_2_NIP`),
+   books are `book_<topic>/<topic>_book.tex` (so a repository `Everything/Everything.tex` becomes `book_everything/everything_book.tex`),
+   a series shares `<prefix>_<n>_<topic>`, chapter files are `<main-name>_<n>_<topic>.tex` or an established subdirectory scheme is kept.
+   Never reuse an existing name. Present the table (old → proposed) and wait for a yes or an edited table **before the import**
+   (renaming afterwards breaks history links).
+3. **Proposed defaults for everything else**, stated in the same message: the paper keeps *its own look* (fonts, class, theorem
+   styles); only bibliography formatting, unified symbols and approved typo fixes may change the print; macros are renamed to
+   the shared names; entries missing from `references.bib` are added; old `.bib` files and per-paper infrastructure are dropped
+   in the new tree (kept in history); junk (PDFs, archives, aux files) is not carried over; dead code is left alone.
+4. **Overrides are normal.** If the user changes a default, apply it everywhere it matters (names in the import, `.sty`,
+   notice) and note the decision in the commit message of the import. Record accepted defaults there too, so the history explains itself.
+5. **Tell the collaborators**: before retiring the old repository (§10) the user must know who else works in it.
 
 ## 1. Inventory the source (read-only)
 
@@ -155,12 +164,15 @@ Follow `STYLE.md` §9 and the approved macro map of the consolidation (`AGENTS.m
 - `make check P=<name>` clean; no `$$`, no `eqnarray`; PDFs and `_build/` are not tracked.
 - One commit per step with a message saying what changed *and* what did not (e.g. "text identical to baseline").
 
-## 8. Questions to bring to the user (do not decide silently)
+## 8. Decisions to put in front of the user (each with your proposed default)
 
-New names; every printed change outside §7; key/label/macro collisions with other papers; placeholders found in sources
-("title to be confirmed"); unresolved references that are not typos; permission problems (push 403); which tracked files
-(`pdf`, `zip`, notes) should not travel; whether to remove dead code; whether a new shared package is warranted;
-whether authors' names/orders in shared bibliography entries are right.
+Do not stop and wait on trivia: batch these into one message, each with a recommended default, and carry on with the defaults
+for anything the user does not answer in the same turn (reversible steps only; never push, delete, or overwrite on a default).
+Typical items: new names (§0); any printed change outside §7; key, label or macro collisions with other papers (default:
+distinct new name for the newcomer); placeholders found in sources ("title to be confirmed": default keep verbatim); unresolved
+references that are not typos (default leave, report); tracked files that should not travel (default: PDFs, archives, notes
+about the old workflow stay behind); dead code (default: leave); a new shared package (default: propose, do not add silently);
+author names/orders in shared bibliography entries that differ from the paper (default: keep the paper's, report).
 
 ## 9. Lessons and pitfalls (from the ten conversions)
 
