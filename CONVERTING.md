@@ -138,8 +138,28 @@ Follow `STYLE.md` §9 and the approved macro map of the consolidation (`AGENTS.m
 
 ## 6. Source style, labels, cross-references
 
-1. **Unwrap** hard-wrapped prose first: `texfix.py unwrap <files> --write` (joins prose lines; leaves display math, tabular, tikz,
-   verbatim, tables and comments alone — check those regions by eye). Skip this for sources that are not hard-wrapped.
+1. **Unwrap hard-wrapped prose first — before any wrapping.** `make format`/`make wrap` only *add* breaks (at sentence ends and
+   clause boundaries); they never remove existing ones, so a file hard-wrapped at column ~80 keeps its mid-sentence breaks unless
+   it is unwrapped first. Skip this step only for sources that are not hard-wrapped (one line per paragraph).
+   - **Run:** `python3 _scripts/migrate/texfix.py unwrap <all .tex files of the paper> ` (dry run: prints a diff to review), then
+     the same with `--write`. Do it as **its own commit** ("Join non-semantic hard line breaks — whitespace only"); you may list the
+     commit in `.git-blame-ignore-revs` (and `git config blame.ignoreRevsFile .git-blame-ignore-revs`) so `git blame` skips it.
+   - **What it does:** from `\begin{document}` on, it joins consecutive prose lines of a paragraph with a single space. An `\item`
+     (or a `\begin{env}[opt]\label{..}` line followed by text) starts a unit whose continuation lines are joined to it; abstracts
+     and theorem bodies are joined like any prose.
+   - **What it leaves alone:** the preamble; blank lines; comment lines and lines ending in a `%` comment; lines ending in `\\`;
+     lines that start with `\begin{`/`\end{`/`\[`/`\]`, a sectioning command, `\label`, `\caption`, `\bibitem`, …; and everything inside
+     display math (`equation`, `align`, `gather`, `multline`, `\[ … \]`, matrices, `cases`), `tabular`/`array`, `table`/`figure`,
+     `tikzpicture`, `verbatim`/`lstlisting`, `thebibliography`.
+   - **Limits (check by hand):** it is a line-based heuristic. Environments it does not know whose line breaks matter (code,
+     poetry, `algorithm`, `longtable`, `minted`, custom tables) are treated as prose and joined — add their names to `NOJOIN_ENVS`
+     in `texfix.py` (copy the script first if other people use it) or protect them with a comment line; a paragraph with
+     inline `\\` or `\newline` stays broken there; prose inside `\caption{…}` continues on several lines but is not joined to the
+     `\caption` line itself. Look at the diff of tables, figures, tikz and long displays before writing.
+   - **Verify it changed only whitespace:** the word sequence must be identical before and after:
+     `diff <(git show HEAD:<file> | tr -s '[:space:]' ' ') <(tr -s '[:space:]' ' ' < <file>)` prints nothing (do this per file);
+     then `make <name>` and `pdfdiff.py baseline.pdf <name>/<name>.pdf` must show no text change at all. Only then continue with
+     step 2, which re-breaks the long lines semantically (one sentence or clause per line).
 2. `make format P=<name>` (typography → Unicode text accents, semantic wrapping, `latexindent`), then delete any `*.bak*`/`indent.log`.
    `texfashion` leaves `\title`/`\author` accents alone — correct. Watch for odd results such as `\'\i k` → `í k`.
 3. **Labels:** prefixes of `STYLE.md` §7 with kebab-case slugs; inspect how single-letter prefixes (`T:`, `D:`, `I:`) are really
