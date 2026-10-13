@@ -148,14 +148,21 @@ Follow `STYLE.md` §9 and the approved macro map of the consolidation (`AGENTS.m
      (or a `\begin{env}[opt]\label{..}` line followed by text) starts a unit whose continuation lines are joined to it; abstracts
      and theorem bodies are joined like any prose.
    - **What it leaves alone:** the preamble; blank lines; comment lines and lines ending in a `%` comment; lines ending in `\\`;
-     lines that start with `\begin{`/`\end{`/`\[`/`\]`, a sectioning command, `\label`, `\caption`, `\bibitem`, …; and everything inside
-     display math (`equation`, `align`, `gather`, `multline`, `\[ … \]`, matrices, `cases`), `tabular`/`array`, `table`/`figure`,
-     `tikzpicture`, `verbatim`/`lstlisting`, `thebibliography`.
-   - **Limits (check by hand):** it is a line-based heuristic. Environments it does not know whose line breaks matter (code,
-     poetry, `algorithm`, `longtable`, `minted`, custom tables) are treated as prose and joined — add their names to `NOJOIN_ENVS`
-     in `texfix.py` (copy the script first if other people use it) or protect them with a comment line; a paragraph with
-     inline `\\` or `\newline` stays broken there; prose inside `\caption{…}` continues on several lines but is not joined to the
-     `\caption` line itself. Look at the diff of tables, figures, tikz and long displays before writing.
+     lines that start with `\begin{`/`\end{`/`\[`/`\]`, a sectioning command, `\label`, `\caption`, `\bibitem`, …; display math
+     (`equation`, `align`, `\[ … \]`, matrices, `cases`); `tabular`, `table`, `figure`, `tikzpicture`, `verbatim`, `thebibliography`;
+     and — the safe default — **every environment it does not recognise as running prose** (code, `algorithm`, `timeline`, custom boxes,
+     custom tables, title pages…). Line breaks there are usually meaningful, so they are never touched.
+   - **Which environments count as prose:** plain body text, `abstract`, lists (`itemize`/`enumerate`/`description`), `proof`, `quote`,
+     `center`/`minipage`/`flush*`, the usual theorem-like environments, and any theorem-like environment *declared* in the file, in a
+     sibling `.sty` or in `di-theorem-rudin` (`\newtheorem`, `\declaretheorem`, `\DiSharedTheorem`, `\newaliascnt`).
+   - **Unrecognised environments are reported, not guessed:** at the end the tool prints each one with its line count and the exact
+     flag to use, e.g. `roadmapbox (81 lines) -> if it is running prose add: --prose-env roadmapbox`. Look at each one: if its content
+     is ordinary paragraphs (a paper-specific `tcolorbox` "summary" or "remark" box), re-run with `--prose-env roadmapbox` (repeatable);
+     if it is code, an algorithm, a timeline or anything layout-sensitive, leave it alone. When in doubt leave it alone — an
+     un-reflowed environment costs nothing, a botched one costs a careful repair.
+   - **Other limits (check by hand):** the tool is line-based. A paragraph with inline `\\` or `\newline` stays broken there;
+     prose inside `\caption{…}` continues on several lines but is not joined to the `\caption` line itself. Look at the diff of tables,
+     figures, tikz and long displays before writing.
    - **Verify it changed only whitespace:** the word sequence must be identical before and after:
      `diff <(git show HEAD:<file> | tr -s '[:space:]' ' ') <(tr -s '[:space:]' ' ' < <file>)` prints nothing (do this per file);
      then `make <name>` and `pdfdiff.py baseline.pdf <name>/<name>.pdf` must show no text change at all. Only then continue with
