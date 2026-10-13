@@ -15,11 +15,20 @@
 # di-base-article, a monograph's <paper>.sty loads di-base-monograph.
 # All papers (subdirectories of the repo root) share these files.
 
-di-base-core.sty       eduenez/LaTeX-shared-files  af98e4f
-di-base-article.sty    eduenez/LaTeX-shared-files  af98e4f
-di-base-monograph.sty  eduenez/LaTeX-shared-files  af98e4f
-di-structures.sty      eduenez/LaTeX-shared-files  af98e4f
-di-ramsey.sty          eduenez/LaTeX-shared-files  af98e4f
-di-random.sty          eduenez/LaTeX-shared-files  af98e4f
-di-exercises.sty       eduenez/LaTeX-shared-files  af98e4f
-references.bib         eduenez/math-bibliography   afa0d2d
+di-base-core.sty       eduenez/LaTeX-shared-files   af98e4f  sha256:5f91c2eb6eb270cb9fb0d5edfb0efb3c494d991854767de01ad98cbd350b0934
+di-base-article.sty    eduenez/LaTeX-shared-files   af98e4f  sha256:546d24378974d137da46b8ce375e7f7912725b7429c88e4ba83a051785fe3d84
+di-base-monograph.sty  eduenez/LaTeX-shared-files   af98e4f  sha256:cad5e2e068f4711df47a461def1c5619b18e697cd978debabcb745ae49ba48d3
+di-structures.sty      eduenez/LaTeX-shared-files   dfca875  sha256:70286b5c5d3f8794519c4ab042814e950bff3cd4a7cf4c0dcdf6d19ed2fd2f97
+di-ramsey.sty          eduenez/LaTeX-shared-files   af98e4f  sha256:4ddd16c9fb8ef92708ed28fa89ecb5f55b1f89c1e702fa3fee2c00dd8520f0ba
+di-random.sty          eduenez/LaTeX-shared-files   af98e4f  sha256:8b78551bf11e8e8e5bf49006a977e06e2b0d589f3429b661d9d4eb2c697e7973
+di-exercises.sty       eduenez/LaTeX-shared-files   af98e4f  sha256:32e63ce8750052d3b56d5611271b9d94d5859cc9df1b435c5e63ea310624ffc4
+references.bib         eduenez/math-bibliography   3bc10d5
+di-alphabets.sty       eduenez/LaTeX-shared-files   dfca875  sha256:cf8387ae29b24bbbaed79865aff508435080e13b06eb6075fd0a8b4e38f6570d
+di-amsalpha.bst        eduenez/LaTeX-shared-files   dfca875  sha256:07d7e3cd1adffc66ade087025628f2bae9e9080e4a0a690c888e3de0987216f1
+di-base.sty            eduenez/LaTeX-shared-files   dfca875  sha256:9de15dde55da21b354d53a6107c812a0788e47583e7c17337faf8af9deb041e2
+di-bipartite-figures.sty eduenez/LaTeX-shared-files   dfca875  sha256:a779a4dc563c137df35c760f8eae4b93887164d223de705bacf86ff9d3579b76
+di-cleveref.sty        eduenez/LaTeX-shared-files   dfca875  sha256:0df10b5c5e7e9e3a5c3aa8fbc6b5c06700556983760907a170c72e50db994bd9
+di-history-icons.sty   eduenez/LaTeX-shared-files   dfca875  sha256:417fbe61de26b3462a46be0a41787df0de23a1dde76b4a7ad426d7c9a14e5000
+di-logic.sty           eduenez/LaTeX-shared-files   dfca875  sha256:e53064bcb0645a5d0952a9006e8e2e32a593dc07d790d4e30fe3d715747379c3
+di-quantum.sty         eduenez/LaTeX-shared-files   dfca875  sha256:7bb461d3f791ac1c7e3166539726d10745b87880cd71366ade2419a08a17dfb4
+di-theorem-rudin.sty   eduenez/LaTeX-shared-files   dfca875  sha256:82e5348d11d18a29f0fff4fccb021b23df915fd033a2f139039c778cc943f745

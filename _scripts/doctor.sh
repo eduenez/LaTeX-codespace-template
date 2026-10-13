@@ -31,8 +31,14 @@ if [ -d .git ] || git rev-parse --git-dir >/dev/null 2>&1; then
   hooks="$(git rev-parse --git-path hooks/pre-commit)"
   [ -f "$hooks" ] && ok "pre-commit hook installed (advisory)" || note "pre-commit hook not installed" "make install-hooks   (advisory reminders; never blocks a commit)"
 fi
+echo "Git behaviour"
+if [ -z "$(git config pull.rebase)" ] && [ -z "$(git config pull.ff)" ]; then note "git pull is not configured" "git config --global pull.rebase false   (plain merge; avoids the 'divergent branches' error)"; else ok "git pull behaviour configured"; fi
+case "$os" in MINGW*|MSYS*|CYGWIN*) [ "$(git config core.autocrlf)" = "true" ] && note "core.autocrlf=true" "git config --global core.autocrlf input   (the repository enforces LF line endings)";; esac
+branch=$(git branch --show-current 2>/dev/null); up=$(git rev-parse --abbrev-ref '@{u}' 2>/dev/null)
+if [ -n "$up" ]; then behind=$(git rev-list --count HEAD..$up 2>/dev/null); [ "${behind:-0}" -gt 0 ] && note "$branch is $behind commit(s) behind $up (as of the last fetch)" "git pull"; fi
 echo "Repository"
 [ -f latexmkrc ] && ok "latexmkrc" || bad "latexmkrc" "this does not look like the repository root"
+[ -f _packages/vendor.lock ] && { python3 _scripts/vendor_check.py >/tmp/vc.$$ 2>&1 && ok "_packages/ pristine (vendor.lock checksums)" || { note "_packages/ differs from vendor.lock" "$(head -3 /tmp/vc.$$ | tail -2 | tr -s ' ' | cut -c1-110)"; }; rm -f /tmp/vc.$$; }
 [ -f references.bib ] && ok "references.bib" || bad "references.bib" "restore it from Git (git checkout -- references.bib)"
 papers=$(for f in [!_.]*/*.tex; do [ -f "$f" ] && grep -l '\\documentclass' "$f" 2>/dev/null; done | xargs -n1 dirname 2>/dev/null | sort -u | tr '\n' ' ')
 [ -n "$papers" ] && ok "papers: $papers" || note "no papers found" "make new P=<name> TYPE=article"

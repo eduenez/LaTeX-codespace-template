@@ -152,6 +152,14 @@ make doctor        # read-only check of tools, Git identity, hooks; says how to 
 New to the repository (or to Git/LaTeX)? [`ONBOARDING.md`](ONBOARDING.md) is a 10-minute guided tour and a
 cheat sheet "old habit → house way". It is meant to be walked through interactively with an AI assistant.
 
+## Keeping the shared files in sync
+
+`_packages/` and `references.bib` are vendored copies of upstream repositories (`LaTeX-shared-files`, `math-bibliography`).
+Three commands keep them honest: `make vendor-check` (are the packages pristine? checksums are pinned in `_packages/vendor.lock`),
+`make bib-diff` (which entries did we add or *edit* relative to the upstream master? additions are welcome, edits of existing
+entries belong upstream) and `make update-shared` (what changed upstream; `python3 _scripts/update_shared.py --apply` refreshes the
+files, keeps your local-only bibliography entries, and re-stamps the checksums). `make doctor` runs the vendor check too.
+
 ## Bringing in an existing repository or document
 
 [`CONVERTING.md`](CONVERTING.md) is the playbook for importing an outside manuscript — with its commit history — as a paper

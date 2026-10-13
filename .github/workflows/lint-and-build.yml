@@ -1,10 +1,13 @@
 name: LaTeX Lint & Build
 
+# The fast lint job runs on every push. The heavy build job (installs texlive-full on the runner: several GB, ~10 minutes)
+# is MANUAL ONLY: Actions -> "LaTeX Lint & Build" -> Run workflow. Papers are built locally (make build).
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -23,6 +26,11 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends chktex
+
+      # Advisory: vendored packages must be pristine (checksums in _packages/vendor.lock).
+      - name: Check vendored packages (advisory)
+        continue-on-error: true
+        run: python3 _scripts/vendor_check.py
 
       # Advisory: modern typography (accents → Unicode, curly quotes, no tabs)
       # via `make fashion`. Surfaces drift as an annotation; never gates.
@@ -65,7 +73,8 @@ jobs:
           exit $ERRORS
 
   build:
-    name: Build PDFs
+    name: Build PDFs (manual only)
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: lint
     steps:

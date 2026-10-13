@@ -1,0 +1,21 @@
+%% di-base.sty — DEPRECATED compatibility shim
+%%
+%% di-base has been split into class-tailored bases over a shared core:
+%%   di-base-core.sty      — class-agnostic (fonts, packages, theorem family)
+%%   di-base-article.sty   — amsart/amsbook (section-scoped numbering)
+%%   di-base-monograph.sty — memoir (chapter-scoped numbering)
+%%
+%% This shim preserves the OLD behaviour (section-scoped numbering, i.e. the
+%% amsart convention) by loading di-base-article, so existing consumers that
+%% still \usepackage{di-base} keep compiling.  New projects and re-syncs
+%% should vendor di-base-core + di-base-article (or -monograph) directly.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{di-base}[2026/07/15 Duenez-Iovino base preamble (DEPRECATED shim)]
+
+\PackageWarning{di-base}{%
+  di-base is deprecated: it now just loads di-base-article (section numbering).\MessageBreak
+  Vendor di-base-core + di-base-article (amsart) or di-base-monograph (memoir)\MessageBreak
+  instead.  See the LaTeX-shared-files README}
+
+\RequirePackage{di-base-article}

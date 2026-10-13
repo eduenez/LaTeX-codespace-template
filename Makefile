@@ -35,7 +35,16 @@ TYPE ?= article
 doctor:
 	@bash _scripts/doctor.sh
 
-.PHONY: doctor all help new export build article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(PAPERS)
+vendor-check:
+	@python3 _scripts/vendor_check.py
+
+bib-diff:
+	@python3 _scripts/bib_diff.py
+
+update-shared:
+	@python3 _scripts/update_shared.py
+
+.PHONY: vendor-check bib-diff update-shared doctor all help new export build article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(PAPERS)
 
 all: help
 
@@ -45,6 +54,9 @@ help:
 	@echo ""
 	@echo "  Setup:"
 	@echo "    make doctor          Check tools and setup; says how to fix what is missing"
+	@echo "    make vendor-check    Verify that _packages/ files are pristine (checksums in vendor.lock)"
+	@echo "    make bib-diff        Compare references.bib with the upstream master (additions / edits)"
+	@echo "    make update-shared   Show (dry run) what changed upstream; add --apply via: python3 _scripts/update_shared.py --apply"
 	@echo ""
 	@echo "  Papers:"
 	@echo "    make new P=name TYPE=article|monograph   Create a new paper from a template"

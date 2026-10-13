@@ -38,7 +38,10 @@ house conventions, and help the person you are working with adopt those conventi
 
 | Command | What it does |
 |---|---|
-| `make doctor` | check tools and setup; prints how to fix what is missing |
+| `make doctor` | check tools, Git settings and setup; prints how to fix what is missing |
+| `make vendor-check` | verify that `_packages/` files are pristine (SHA-256 in `vendor.lock`) |
+| `make bib-diff` | compare `references.bib` with the upstream master: entries to propose upstream, entries edited locally |
+| `make update-shared` | dry run: what changed upstream (shared packages and bibliography); `python3 _scripts/update_shared.py --apply` updates |
 | `make new P=<name> TYPE=article\|monograph` | create a paper from a template |
 | `make <paper>` / `make build` | build one paper / all papers (PDF next to the source, aux files in `_build/`) |
 | `make format [P=<paper>]` | typography + semantic line wrapping + indentation (idempotent) |
@@ -68,7 +71,7 @@ Never run `latexmk` at the repository root. Built PDFs and `_build/` are git-ign
 4. **Cross references.** Labels use the prefixes of `STYLE.md` §7 with kebab-case slugs (`thm:main-result`); refer to them
    with `\cref{...}` (list: `\cref{a,b}`), never `Theorem~\ref{...}`. Shared-counter theorem environments must be declared
    with `\DiSharedTheorem` (see `di-theorem-rudin`) so that `\cref` prints the right name.
-5. **Bibliography.** Add entries only to the root `references.bib` (never a per-paper `.bib`, never an inline
+5. **Bibliography.** (`make bib-diff` shows your additions and any edits of existing entries; fix existing entries upstream, in `math-bibliography`.) Add entries only to the root `references.bib` (never a per-paper `.bib`, never an inline
    `thebibliography`); reuse an existing entry if the work is already there. Keys: `Author-Author:YYYY` (lower-case
    suffix `a`, `b`, … for same author-year; `:0000` if undated); a hyphen only separates authors, never appears inside a
    surname (`BenYaacov`, `NashWilliams`, `vonNeumann`). Brace accents and capitals that must survive BibTeX
