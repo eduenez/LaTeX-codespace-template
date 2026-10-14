@@ -42,15 +42,17 @@ check('expl3 variable names', T("\\tl_new:N \\l__foundations_target_chapter_tl")
 check('expl3 region', T("\\ExplSyntaxOn\n`a'\n\\ExplSyntaxOff\n``x''"), "\\ExplSyntaxOn\n`a'\n\\ExplSyntaxOff\n“x”")
 check('accents', T("Fr\\'echet and M\\\"obius"), "Fréchet and Möbius")
 
-# --- repair_primes.py: restore primes that were turned into quotes inside formulas -------------------------------
-sys.path.insert(0, str(Path(__file__).resolve().parent / 'migrate'))
-import repair_primes as rp  # noqa: E402
+# --- repair_primes.py (present only in repositories that carry _scripts/migrate/) ------------------------------
+if (Path(__file__).resolve().parent / 'migrate' / 'repair_primes.py').exists():
+    sys.path.insert(0, str(Path(__file__).resolve().parent / 'migrate'))
+    import repair_primes as rp  # noqa: E402
 
-check('repair: formulas', rp.repair("then $0”$ and $0”'$, \\[m+n”=m”+n.\\] $(m”,n”)$")[0],
-      "then $0''$ and $0'''$, \\[m+n''=m''+n.\\] $(m'',n'')$")
-check('repair: quotation inside \\text{} is kept', rp.repair("\\[\\text{“$t_1$ and more”}\\] and $x”$")[0],
-      "\\[\\text{“$t_1$ and more”}\\] and $x''$")
-check('repair: prose quotes are kept', rp.repair("He said “hi” and don’t. $f’$")[0], "He said “hi” and don’t. $f'$")
+    check('repair: formulas', rp.repair("then $0”$ and $0”'$, \\[m+n”=m”+n.\\] $(m”,n”)$")[0],
+          "then $0''$ and $0'''$, \\[m+n''=m''+n.\\] $(m'',n'')$")
+    check('repair: quotation inside \\text{} is kept', rp.repair("\\[\\text{“$t_1$ and more”}\\] and $x”$")[0],
+          "\\[\\text{“$t_1$ and more”}\\] and $x''$")
+    check('repair: prose quotes are kept', rp.repair("He said “hi” and don’t. $f’$")[0], "He said “hi” and don’t. $f'$")
+
 
 if fails:
     print('\n' + '\n'.join(fails))
