@@ -42,6 +42,10 @@ define need_force
   echo "If you really mean all of them:  make $@ FORCE=1"; exit 2; fi
 endef
 
+## test: regression tests of the formatting scripts
+test:
+	@python3 _scripts/test_scripts.py && python3 _scripts/test_texfashion.py
+
 doctor:
 	@bash _scripts/doctor.sh
 
@@ -54,7 +58,7 @@ bib-diff:
 update-shared:
 	@python3 _scripts/update_shared.py
 
-.PHONY: vendor-check bib-diff update-shared doctor all help new export build build-all article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(PAPERS)
+.PHONY: test vendor-check bib-diff update-shared doctor all help new export build build-all article pdf PDF compile format reflow fashion wrap indent sep check lint clean install-hooks $(PAPERS)
 
 all: help
 

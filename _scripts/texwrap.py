@@ -23,17 +23,23 @@ nesting is tracked per line).  Break-point rules (in order of priority):
 
   1. MANDATORY — Sentence end (". ", "? ", "! ", etc.): always ends a
      file line, even if the sentence is short.
-  2. MANDATORY — Semicolon / colon ("; ", ": "): always ends a file
-     line (splits compound sentences).
+  2. MANDATORY — Semicolon / colon ("; ", ": "): ends a file line
+     (splits compound sentences), except after an abbreviation that owns
+     its colon ("i.e.:", "e.g.:", "cf.:") or when it would strand a
+     fragment shorter than --min-clause.
   3. CONDITIONAL — Applied only when a line produced by rules 1–2 still
      exceeds --cols:
      3.1  Inline-math span boundary (break *before* the opening "$" or
           *after* the closing "$"), or a parenthetical / em-dash boundary.
      3.2  Comma ", " (lower priority).
      3.3  Word boundary (space).
-     3.4  Semicolon *inside* a formula (allowed for very long formulas,
-          lowest priority — normally never used).
-     3.5  Hard cut at column 80 (last resort).
+
+     If none of these yields a candidate, the line is left LONG and
+     intact.  There is no hard cut at a fixed column: such a cut is blind
+     to the region map, so it can split a word, land inside a formula,
+     or fall past a "%" — promoting commented-out text into live source
+     and breaking the document.  An over-long line is cosmetic; a
+     corrupted one is not.
 
 For rule-3 breaks, the scanner looks from column 50 forward to --cols,
 picking the *first* (leftmost) candidate at the *highest* priority
@@ -49,11 +55,20 @@ Content inside display-math regions (\\[ … \\], equation, align, …),
 verbatim-style environments, and pure comment lines is never modified.
 Indentation and blank lines are never changed (latexindent owns them).
 
-Usage:
-    python3 texwrap.py [--check] [--cols N] file1.tex [file2.tex …]
+Math state is carried ACROSS source lines.  A "$…$" span or a "\\[…\\]"
+display that opens on one line and closes on another — including a
+display opened mid-line, as in "…is given by \\[f(0)=0." — stays
+recognized as math on its continuation lines.  Scanning each line in
+isolation would treat those continuations as prose and break inside the
+formula.  State resets at every blank line, where TeX permits no open
+formula anyway, so any mis-tracking is bounded to one paragraph.
 
-    --check   Dry run: report files that would change, exit 1 if any.
-    --cols N  Content-width limit, excluding indentation (default: 255).
+Usage:
+    python3 texwrap.py [--check] [--cols N] [--min-clause N] FILE…
+
+    --check        Dry run: report files that would change, exit 1 if any.
+    --cols N       Content-width limit, excluding indentation (default: 255).
+    --min-clause N Shortest fragment a rule-2 break may strand (default: 16).
 """
 
 import argparse
@@ -67,7 +82,13 @@ from pathlib import Path
 
 DEFAULT_COLS: int = 255
 SCAN_START: int = 50  # start scanning for rule-3 breaks here
-HARD_CUT: int = 80  # absolute last-resort break column
+
+# Minimum content width a mandatory CLAUSE break (rule 2) may leave behind.
+# Sentence breaks (rule 1) are never subject to it — "Yes." is a legitimate
+# line — but a ";"/":" break that would strand a fragment such as "(read:" or
+# "i.e.:" on a line of its own produces noise, not structure.  Tunable with
+# --min-clause; 0 disables the guard.
+MIN_CLAUSE_COLS: int = 16
 
 # Bodies of these environments are never touched (treated as verbatim)
 VERBATIM_ENVS: frozenset = frozenset(
@@ -135,6 +156,15 @@ _ABBREV_RE = re.compile(
 )
 
 
+# Abbreviations that routinely carry a trailing colon in mathematical prose
+# ("i.e.:", "e.g.:", "cf.:").  The colon there belongs to the abbreviation, not
+# to a clause boundary, so rule 2 must not break after it.  Matched against the
+# token immediately preceding the colon.
+_COLON_ABBREV_RE = re.compile(
+    r"(?:i\.e|e\.g|viz|cf|resp|et\sal|N\.B|etc|[A-Z])\.$"
+)
+
+
 # ---------------------------------------------------------------------------
 # Math / comment region scan
 # ---------------------------------------------------------------------------
@@ -143,6 +173,68 @@ _ABBREV_RE = re.compile(
 _R_TEXT = 0
 _R_MATH = 1
 _R_COMMENT = 2
+
+
+def _scan_line(
+    s: str, start_in_math: bool = False, start_depth: int = 0
+) -> tuple[list[int], bool, int]:
+    """Classify *s* and report the state left open at end of line.
+
+    Same scan as :func:`_scan_regions`, but also returns whether the line
+    ends inside a formula.  ``process`` threads that flag into the next
+    line so a ``$…$`` or ``\\[…\\]`` span that crosses a source line break
+    is still recognized as math on its continuation lines — without it,
+    every continuation line is scanned as prose and can be broken inside
+    the formula.
+
+    The closing brace depth is carried for the same reason: a ``\\footnote{…}``
+    whose body spans several source lines must keep suppressing clause breaks
+    on every one of them, not just the line bearing the opening brace.
+    """
+    region = _scan_regions(s, start_in_math)
+    depth = _brace_depth_map(s, region, start_depth)
+    # Re-derive the closing state from the scan: a comment ends at the line
+    # break, so only math can stay open.
+    in_math = start_in_math
+    i, n = 0, len(s)
+    while i < n:
+        c = s[i]
+        if region[i] == _R_COMMENT:
+            break  # comment runs to end of line; state frozen
+        if c == "\\":
+            nxt = s[i + 1] if i + 1 < n else ""
+            if nxt in "([":
+                in_math = True
+            elif nxt in ")]":
+                in_math = False
+            i += 2 if nxt else 1
+            continue
+        if c == "$":
+            if i + 1 < n and s[i + 1] == "$":
+                in_math = not in_math
+                i += 2
+                continue
+            in_math = not in_math
+        i += 1
+    # Depth left open at end of line.  The map records the level *at* each
+    # character (outside the group for "{", after closing for "}"), so the
+    # trailing level is re-derived here — walking the string the same way
+    # _brace_depth_map does, escapes included, so the two cannot disagree.
+    end_depth = start_depth
+    j = 0
+    while j < n:
+        if region[j] == _R_COMMENT:
+            break  # a comment runs to end of line; braces in it are inert
+        c = s[j]
+        if c == "\\":  # escape: this char and the next are literal
+            j += 2
+            continue
+        if c == "{":
+            end_depth += 1
+        elif c == "}":
+            end_depth = max(0, end_depth - 1)
+        j += 1
+    return region, in_math, end_depth
 
 
 def _scan_regions(s: str, start_in_math: bool = False) -> list[int]:
@@ -213,7 +305,9 @@ def _scan_regions(s: str, start_in_math: bool = False) -> list[int]:
     return region
 
 
-def _brace_depth_map(s: str, region: list[int]) -> list[int]:
+def _brace_depth_map(
+    s: str, region: list[int], start_depth: int = 0
+) -> list[int]:
     """Return the brace-group nesting depth at each character of *s*.
 
     Counts unescaped ``{`` / ``}`` outside comments (``\\{`` and ``\\}`` are
@@ -225,12 +319,17 @@ def _brace_depth_map(s: str, region: list[int]) -> list[int]:
     Used to keep the mandatory clause/sentence breaks (rules 1–2) out of
     braced macro arguments: a ``;`` in ``\\subjclass{Primary; Secondary}`` or
     a ``:`` in ``\\title{Foo: Bar}`` is punctuation *inside* an argument, not a
-    prose clause boundary, and must not force a line break.  Tracking is
-    per-line (a group opened on an earlier source line is not carried over).
+    prose clause boundary, and must not force a line break.
+
+    *start_depth* is the depth inherited from the previous source line.
+    Without it, tracking is per-line and wrapping is NOT idempotent: a colon
+    inside a ``\\footnote{…}`` is correctly suppressed on the pass that sees the
+    opening brace, then breaks on the next pass once the body has moved to a
+    continuation line where the brace is no longer visible.
     """
     n = len(s)
     depth = [0] * n
-    d = 0
+    d = start_depth
     i = 0
     while i < n:
         if region[i] == _R_COMMENT:
@@ -386,9 +485,19 @@ def _is_close_paren_boundary(line: str, i: int) -> int | None:
 # ---------------------------------------------------------------------------
 
 
-def _mandatory_split(line: str) -> list[str]:
+def _mandatory_split(
+    line: str,
+    start_in_math: bool = False,
+    min_clause: int = MIN_CLAUSE_COLS,
+    start_depth: int = 0,
+) -> list[str]:
     """Split *line* at every sentence end (rule 1) and every semicolon /
     colon (rule 2).  Returns a list of sub-lines (without trailing spaces).
+
+    *start_in_math* says whether the line begins inside a formula left open
+    on an earlier source line, *start_depth* the brace nesting inherited the
+    same way, and *min_clause* the shortest fragment a rule-2 break may strand
+    (rule 1 is never suppressed).
     """
     indent = line[: len(line) - len(line.lstrip())]
     pieces: list[str] = []
@@ -396,9 +505,9 @@ def _mandatory_split(line: str) -> list[str]:
     i = 0
     n = len(line)
     # Only break in text mode: never inside inline math or a comment.
-    region = _scan_regions(line)
+    region = _scan_regions(line, start_in_math)
     # …and never at a boundary that lands inside a braced macro argument.
-    depth = _brace_depth_map(line, region)
+    depth = _brace_depth_map(line, region, start_depth)
 
     while i < n:
         # Rule 1: sentence end (text mode, at top level only)
@@ -425,6 +534,20 @@ def _mandatory_split(line: str) -> list[str]:
                 if nxt in ("=", ":"):
                     i += 1
                     continue
+                # "i.e.:", "e.g.:", "cf.:" — the colon belongs to the
+                # abbreviation, not to a clause boundary.
+                wstart = i - 1
+                while wstart >= 0 and (
+                    line[wstart].isalnum() or line[wstart] == "."
+                ):
+                    wstart -= 1
+                if _COLON_ABBREV_RE.match(line[wstart + 1 : i]):
+                    i += 1
+                    continue
+            # Do not strand a fragment too short to be worth its own line.
+            if min_clause and (i + 1) - start < min_clause:
+                i += 1
+                continue
             # Suppress a clause break inside a braced argument, e.g. the ";" in
             # \subjclass{Primary; Secondary} or the ":" in \title{Foo: Bar}.
             if depth[i] != 0:
@@ -464,8 +587,8 @@ _R3_PAREN = 1  # 3.1 parentheses
 _R3_EMDASH = 1  # 3.2 em-dashes (same priority as parens)
 _R3_COMMA = 2  # 3.3.1
 _R3_SPACE = 3  # 3.3.2
-_R3_MATH_SEMI = 4  # semicolon *inside* math — allowed, but lowest priority
-# 3.3.4 hard cut is handled separately
+# There is deliberately no in-formula candidate and no unconditional hard cut:
+# see _break_long_line.
 
 
 def _collect_rule3_candidates(
@@ -477,11 +600,11 @@ def _collect_rule3_candidates(
     index of the first character of the continuation line.
     Scans left-to-right from *lo* to *hi*.
 
-    Math-aware: breaks are never placed inside a formula, except a
-    semicolon (a common argument separator) which is offered at the lowest
-    priority for very long formulas.  The preferred candidates near a
-    formula are the span boundaries — break *before* the opening ``$`` or
-    *after* the closing ``$``.
+    Math-aware: breaks are never placed inside a formula.  The preferred
+    candidates near a formula are the span boundaries — break *before* the
+    opening ``$`` or *after* the closing ``$``.  Every candidate returned
+    therefore sits in text mode, which is what lets the caller assume the
+    remainder of a broken line starts in text mode.
     """
     hi = min(hi, len(line))
     cands: list[tuple[int, int]] = []
@@ -497,10 +620,7 @@ def _collect_rule3_candidates(
             cands.append((_R3_MATH_BOUNDARY, i + 1))  # after closing delimiter
 
         if r == _R_MATH:
-            # Inside a formula: only a "; " is a (very low priority) candidate.
-            if line[i] == ";" and i + 1 < len(line) and line[i + 1] == " ":
-                cands.append((_R3_MATH_SEMI, i + 2))
-            i += 1
+            i += 1  # never break inside a formula
             continue
         if r == _R_COMMENT:
             i += 1  # never break inside a comment
@@ -546,26 +666,36 @@ def _collect_rule3_candidates(
     return cands
 
 
-def _break_long_line(line: str, max_cols: int) -> list[str]:
-    """Apply rule-3 breaking to a single line that exceeds *max_cols*."""
+def _break_long_line(
+    line: str, max_cols: int, start_in_math: bool = False
+) -> list[str]:
+    """Apply rule-3 breaking to a single line that exceeds *max_cols*.
+
+    If no safe candidate exists the line is returned **long, and intact**.
+    There is no unconditional hard cut: a cut at a fixed column knows nothing
+    about the region map, so it could fall inside a word, inside a formula, or
+    — worst — past a ``%``, which silently promotes commented-out material into
+    live source.  An over-long line is a cosmetic problem; a corrupted one is
+    not.
+
+    *start_in_math* applies to the first segment only.  Every rule-3 candidate
+    sits in text mode, so each subsequent remainder begins in text mode.
+    """
     indent = line[: len(line) - len(line.lstrip())]
     pieces: list[str] = []
     cur = line
+    carry = start_in_math
 
     while len(cur) > max_cols:
-        lo = SCAN_START
-        hi = max_cols
-        cands = _collect_rule3_candidates(cur, lo, hi, _scan_regions(cur))
+        cands = _collect_rule3_candidates(
+            cur, SCAN_START, max_cols, _scan_regions(cur, carry)
+        )
+        if not cands:
+            break  # nothing safe in the window — leave the rest as one line
 
-        if cands:
-            # Pick the first (leftmost) candidate at the best (lowest)
-            # priority level.
-            best_prio = min(p for p, _ in cands)
-            # Among best-priority, pick leftmost
-            bp = min(pos for p, pos in cands if p == best_prio)
-        else:
-            # 3.3.3 Hard cut
-            bp = HARD_CUT
+        # Pick the first (leftmost) candidate at the best (lowest) priority.
+        best_prio = min(p for p, _ in cands)
+        bp = min(pos for p, pos in cands if p == best_prio)
 
         if bp >= len(cur):
             break
@@ -573,6 +703,7 @@ def _break_long_line(line: str, max_cols: int) -> list[str]:
         pieces.append(cur[:bp].rstrip())
         rest = cur[bp:].lstrip(" ") if bp > 0 and cur[bp - 1] == " " else cur[bp:]
         cur = indent + rest if rest else ""
+        carry = False
 
     if cur:
         pieces.append(cur)
@@ -584,7 +715,13 @@ def _break_long_line(line: str, max_cols: int) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-def _wrap_line(line: str, max_cols: int) -> list[str]:
+def _wrap_line(
+    line: str,
+    max_cols: int,
+    start_in_math: bool = False,
+    min_clause: int = MIN_CLAUSE_COLS,
+    start_depth: int = 0,
+) -> list[str]:
     """Wrap one prose line using the two-phase strategy.
 
     Width limits are measured against the *de-indented* content: the line
@@ -598,14 +735,17 @@ def _wrap_line(line: str, max_cols: int) -> list[str]:
     indent = line[: len(line) - len(stripped)]
 
     # Phase 1: mandatory splits (sentence ends, semicolons, colons),
-    # on the de-indented content.
-    segments = _mandatory_split(stripped)
+    # on the de-indented content.  Only the first segment can inherit an
+    # open formula: mandatory breaks are placed in text mode only.
+    segments = _mandatory_split(stripped, start_in_math, min_clause, start_depth)
 
     # Phase 2: break any segment whose content still exceeds max_cols.
     pieces: list[str] = []
-    for seg in segments:
+    for idx, seg in enumerate(segments):
         if len(seg) > max_cols:
-            pieces.extend(_break_long_line(seg, max_cols))
+            pieces.extend(
+                _break_long_line(seg, max_cols, start_in_math and idx == 0)
+            )
         else:
             pieces.append(seg)
 
@@ -619,17 +759,54 @@ def _wrap_line(line: str, max_cols: int) -> list[str]:
 
 _BEGIN_RE = re.compile(r"\\begin\{([^}]+)\}")
 _END_RE = re.compile(r"\\end\{([^}]+)\}")
-_DISPLAY_OPEN = re.compile(r"^\s*\\\[")
-_DISPLAY_CLOSE = re.compile(r"^\s*\\\]")
+# NOTE: there are deliberately no _DISPLAY_OPEN / _DISPLAY_CLOSE regexes here.
+# Anchoring them at the start of a line recognized "\[" only when it was the
+# first token, so a display opened mid-line — "…is given by \[f(0)=0." — was
+# invisible and its body was wrapped as prose.  _scan_line tracks "\[…\]"
+# together with "$…$" as one carried math state, which handles both positions.
 _COMMENT_LINE = re.compile(r"^\s*%")
 
-# An \item (optionally \item[label]) carrying inline body content on the same
-# line.  House style is a *standalone* \item: the body drops to the next line
-# (and latexindent then indents it one level).  A bare \item / \item[label]
-# with nothing after it does not match and is left alone.
-_ITEM_INLINE_RE = re.compile(
-    r"^(?P<indent>[ \t]*)\\item(?P<opt>\[[^\]]*\])?[ \t]+(?P<rest>\S.*)$"
-)
+# An \item, optionally carrying an [label], anywhere on a line.  House style is
+# a *standalone* \item: the body drops to the next line (and latexindent then
+# indents it one level).  Anchoring this at ^ would normalize only the FIRST
+# \item on a line and silently leave the rest of a run — "\item[(1)] … \item[(2)]
+# … \item[(3)] …" on one source line — glued together, which is exactly the
+# shape that most needs splitting.
+_ITEM_RE = re.compile(r"\\item(?P<opt>\[[^\]]*\])?")
+
+
+def _split_items(line: str, start_in_math: bool) -> list[str] | None:
+    r"""Split *line* so that every ``\item`` on it stands alone.
+
+    Returns the replacement lines, or None if the line needs no restructuring
+    (no \item, or a single bare \item already standing alone).  Only \item
+    tokens in text mode count — one inside a formula or a comment is not an
+    item marker.
+    """
+    region = _scan_regions(line, start_in_math)
+    hits = [m for m in _ITEM_RE.finditer(line) if region[m.start()] == _R_TEXT]
+    if not hits:
+        return None
+
+    indent = line[: len(line) - len(line.lstrip())]
+    # Nothing to do for a line that is already just a standalone \item.
+    if len(hits) == 1 and not line[hits[0].end() :].strip():
+        if not line[: hits[0].start()].strip():
+            return None
+
+    out: list[str] = []
+    # Any text preceding the first \item stays on its own line.
+    lead = line[: hits[0].start()].rstrip()
+    if lead.strip():
+        out.append(lead)
+
+    for k, m in enumerate(hits):
+        out.append(indent + "\\item" + (m.group("opt") or ""))
+        end = hits[k + 1].start() if k + 1 < len(hits) else len(line)
+        body = line[m.end() : end].strip()
+        if body:
+            out.append(indent + body)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -637,11 +814,18 @@ _ITEM_INLINE_RE = re.compile(
 # ---------------------------------------------------------------------------
 
 
-def process(text: str, max_cols: int) -> str:
+def process(
+    text: str, max_cols: int, min_clause: int = MIN_CLAUSE_COLS
+) -> str:
     """Return reformatted content for one .tex file."""
     env_stack: list[str] = []
-    in_display_math = False
     out: list[str] = []
+    # State left open at the end of the previous line.  carry_math covers both
+    # a ``$…$`` span and a ``\[…\]`` display opened mid-line; carry_depth covers
+    # a braced macro argument such as ``\footnote{…}`` whose body runs on.
+    # Neither can be recognized by looking at one line in isolation.
+    carry_math = False
+    carry_depth = 0
 
     for raw in text.splitlines():
         line = raw.rstrip()
@@ -650,17 +834,12 @@ def process(text: str, max_cols: int) -> str:
         if line == "" or line.isspace():
             # Preserve blank lines verbatim; latexindent owns blank-line policy.
             out.append("")
-            continue
-
-        if _DISPLAY_OPEN.match(line):
-            in_display_math = True
-            out.append(line)
-            continue
-
-        if in_display_math:
-            out.append(line)
-            if _DISPLAY_CLOSE.match(line):
-                in_display_math = False
+            # A blank line ends a paragraph, where TeX permits neither an open
+            # formula nor an unclosed macro argument.  Resetting here is
+            # therefore always correct, and it bounds any mis-tracking to the
+            # paragraph it started in.
+            carry_math = False
+            carry_depth = 0
             continue
 
         for m in _BEGIN_RE.finditer(line):
@@ -675,18 +854,40 @@ def process(text: str, max_cols: int) -> str:
                     del env_stack[i]
                     break
 
-        if in_protected or _COMMENT_LINE.match(line):
+        if in_protected:
+            # Environment bodies are copied verbatim and contribute no inline
+            # math state to the lines that follow them.
             out.append(line)
+            continue
+
+        if _COMMENT_LINE.match(line):
+            # A comment runs to end of line, so it cannot change math state.
+            out.append(line)
+            continue
+
+        started_in_math, started_depth = carry_math, carry_depth
+        _, carry_math, carry_depth = _scan_line(
+            line, started_in_math, started_depth
+        )
+
+        items = _split_items(line, started_in_math)
+        if items is None:
+            out.extend(
+                _wrap_line(
+                    line, max_cols, started_in_math, min_clause, started_depth
+                )
+            )
         else:
-            item = _ITEM_INLINE_RE.match(line)
-            if item:
-                # Standalone \item: keep \item (with any [label]) on its own
-                # line, drop the body to the next line (indented by latexindent).
-                indent = item.group("indent")
-                out.append(indent + "\\item" + (item.group("opt") or ""))
-                out.extend(_wrap_line(indent + item.group("rest"), max_cols))
-            else:
-                out.extend(_wrap_line(line, max_cols))
+            # \item markers are emitted as-is; only their bodies are wrapped.
+            for piece in items:
+                if _ITEM_RE.fullmatch(piece.strip()):
+                    out.append(piece)
+                else:
+                    out.extend(
+                        _wrap_line(
+                            piece, max_cols, False, min_clause, started_depth
+                        )
+                    )
 
     return "\n".join(out) + ("\n" if text.endswith("\n") else "")
 
@@ -714,6 +915,17 @@ def main() -> int:
         metavar="N",
         help=f"Target column width (default: {DEFAULT_COLS}).",
     )
+    ap.add_argument(
+        "--min-clause",
+        type=int,
+        default=MIN_CLAUSE_COLS,
+        metavar="N",
+        help=(
+            "Shortest fragment a semicolon/colon break may strand "
+            f"(default: {MIN_CLAUSE_COLS}; 0 disables). Sentence breaks are "
+            "never suppressed."
+        ),
+    )
     args = ap.parse_args()
 
     changed: list[str] = []
@@ -723,7 +935,7 @@ def main() -> int:
             print(f"texwrap: {path}: file not found", file=sys.stderr)
             continue
         original = path.read_text(encoding="utf-8")
-        result = process(original, args.cols)
+        result = process(original, args.cols, args.min_clause)
         if result != original:
             changed.append(str(path))
             if not args.check:

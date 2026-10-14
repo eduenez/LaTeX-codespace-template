@@ -320,8 +320,12 @@ def _read_accent_arg(text: str, p: int):
 # ---------------------------------------------------------------------------
 
 
-def transform(text: str) -> str:
-    """Return the modernized text (see module docstring)."""
+def transform(text: str, math_char_map: "dict[str, str] | None" = None) -> str:
+    """Return the modernized text (see module docstring).
+
+    math_char_map (used by migrate/repair_primes.py): characters to replace where the scanner is in math mode,
+    e.g. {"”": "\x01"} marks every closing quote that sits inside a formula.  Everything else is unchanged.
+    """
     n = len(text)
     out: list[str] = []
     i = 0
@@ -610,7 +614,7 @@ def transform(text: str) -> str:
         # ── math body / expl3 code: copy verbatim.  In math this is where
         #    ' stays a prime; in expl3, ' and ` carry no quote meaning. ─────
         if not in_text():
-            out.append(c)
+            out.append(math_char_map.get(c, c) if (math_char_map and in_math()) else c)
             i += 1
             continue
 
