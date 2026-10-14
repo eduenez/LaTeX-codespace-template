@@ -26,9 +26,21 @@ What it changes (text mode only):
 
   3. Tabs  ->  two spaces (everywhere except verbatim environments).
 
+Arguments of \\texttt, \\url and \\path are copied whole too (typewriter ``''`` is two apostrophes).
+Macro definitions (\\newcommand, \\def, …) are copied whole: their bodies are often math without dollars,
+where ``''`` is a double prime (``\\newcommand{\\fpp}{f''}``), not a closing quote.
+
 Everything else — including math, verbatim/lstlisting/minted, and the
 bodies of comments — is copied through untouched (a comment keeps its
 quotes; only its tabs are expanded).
+
+expl3 code is also left alone.  In expl3, ``_`` and ``:`` are letters, so
+a variable named ``\\l__module_foo_tl`` begins with what an ordinary TeX
+scanner reads as the control word ``\\l`` — the Polish ł.  Substituting
+there silently renames the variable and breaks the document.  Two guards
+prevent it: a control word immediately followed by ``_`` or ``:`` is an
+expl3 name and is copied verbatim, and substitutions are suppressed
+outright between ``\\ExplSyntaxOn`` and ``\\ExplSyntaxOff``.
 
 Usage:
     python3 texfashion.py [--check] file1.tex [file2.tex …]
@@ -112,6 +124,81 @@ MATH_ENVS: frozenset = frozenset(
 # TeX's font ligatures) but survive \uppercase.  Quotes/accents everywhere else
 # (body, footnotes, section headings) are still modernized normally.
 PROTECTED_ARG_MACROS: frozenset = frozenset({"title", "author"})
+
+# Macro definitions: the body is copied VERBATIM.  A body such as ``\newcommand{\fpp}{f''}`` is math
+# written without the surrounding ``$`` (it is typeset in whatever mode the macro is used), so the quote
+# conversion must not touch it: there ``''`` is a double prime, never a closing quotation mark.
+DEFINITION_MACROS: frozenset = frozenset(
+    {"newcommand", "renewcommand", "providecommand", "DeclareRobustCommand", "def", "gdef", "edef", "xdef"}
+)
+
+
+# Macros whose braced argument is typeset literally (typewriter text, URLs): copied verbatim, because in \texttt
+# the pair '' is two apostrophes, not a closing quote, and a URL or path must never be altered.
+LITERAL_ARG_MACROS: frozenset = frozenset({"texttt", "url", "path"})
+
+
+def _braced_end(text: str, p: int) -> int:
+    """Index just past the {...} group that starts at text[p] (honouring escapes and % comments); -1 if unbalanced."""
+    depth, n = 0, len(text)
+    while p < n:
+        c = text[p]
+        if c == "\\":
+            p += 2
+            continue
+        if c == "%":
+            nl = text.find("\n", p)
+            p = n if nl == -1 else nl + 1
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                return p + 1
+        p += 1
+    return -1
+
+
+def _definition_end(text: str, j: int, name: str) -> int:
+    """For \\newcommand-like and \\def-like macros whose name ends at text[j]: index just past the body, or -1."""
+    n, p = len(text), j
+    if name != "def" and name not in ("gdef", "edef", "xdef"):
+        if p < n and text[p] == "*":
+            p += 1
+        while p < n and text[p] in " \t":
+            p += 1
+        if p < n and text[p] == "{":                      # {\name}
+            p = _braced_end(text, p)
+        elif p < n and text[p] == "\\":                   # \name
+            q = p + 1
+            while q < n and text[q].isalpha():
+                q += 1
+            p = max(q, p + 2)
+        else:
+            return -1
+        if p < 0:
+            return -1
+        while True:                                       # [nargs][default]
+            while p < n and text[p] in " \t":
+                p += 1
+            if p < n and text[p] == "[":
+                close = text.find("]", p)
+                if close == -1:
+                    return -1
+                p = close + 1
+            else:
+                break
+    else:                                                 # \def\name#1#2{...}: skip the parameter text
+        while p < n and text[p] != "{":
+            if text[p] == "\n" and text[p + 1 : p + 2] == "\n":
+                return -1
+            p += 2 if text[p] == "\\" else 1
+    while p < n and text[p] in " \t\n":
+        p += 1
+    if p < n and text[p] == "{":
+        return _braced_end(text, p)
+    return -1
 
 # ---------------------------------------------------------------------------
 # Accent tables
@@ -241,6 +328,7 @@ def transform(text: str) -> str:
 
     env_stack: list[str] = []
     in_comment = False
+    expl3 = False  # inside \ExplSyntaxOn … \ExplSyntaxOff
     dollar = False  # inside $ … $
     ddollar = False  # inside $$ … $$
     paren = False  # inside \( … \)
@@ -248,6 +336,10 @@ def transform(text: str) -> str:
 
     def in_verbatim() -> bool:
         return any(e in VERBATIM_ENVS for e in env_stack)
+
+    def in_text() -> bool:
+        """Substitutions apply only here: text mode, outside expl3 code."""
+        return not in_math() and not expl3
 
     def in_math() -> bool:
         return (
@@ -304,6 +396,26 @@ def transform(text: str) -> str:
                     j += 1
                 name = text[i + 1 : j]
 
+                # expl3 syntax switches.
+                if name in ("ExplSyntaxOn", "ExplSyntaxOff"):
+                    expl3 = name == "ExplSyntaxOn"
+                    out.append(text[i:j])
+                    i = j
+                    continue
+
+                # An expl3 variable/function name: in expl3, "_" and ":" are
+                # letters, so \l__module_foo_tl scans here as the control word
+                # \l (Polish ł) followed by "__module_foo_tl".  Rewriting that
+                # renames the variable and breaks the build.  Copy the whole
+                # name verbatim.
+                if j < n and text[j] in "_:":
+                    k = j
+                    while k < n and (text[k].isalpha() or text[k] in "_:"):
+                        k += 1
+                    out.append(text[i:k])
+                    i = k
+                    continue
+
                 if name in ("begin", "end"):
                     k = j
                     while k < n and text[k] in " \t":
@@ -343,7 +455,7 @@ def transform(text: str) -> str:
                     continue
 
                 # word-accent (\v \c \H …) — text mode only
-                if (not in_math()) and name in _WORD_ACCENTS:
+                if in_text() and name in _WORD_ACCENTS:
                     base, nxt = _read_accent_arg(text, j)
                     if base is not None:
                         out.append(_compose(base, name))
@@ -354,7 +466,7 @@ def transform(text: str) -> str:
                     continue
 
                 # standalone special letter (\o \ss \ae \i …) — text mode only
-                if (not in_math()) and name in _SPECIAL_LETTERS:
+                if in_text() and name in _SPECIAL_LETTERS:
                     out.append(_SPECIAL_LETTERS[name])
                     i = j
                     # TeX gobbles one separating space or an empty {} group
@@ -364,10 +476,26 @@ def transform(text: str) -> str:
                         i += 1
                     continue
 
+                # literal arguments (\texttt, \url, \path): copy verbatim.
+                if in_text() and name in LITERAL_ARG_MACROS and j < n and text[j] == "{":
+                    end = _braced_end(text, j)
+                    if end != -1:
+                        out.append(text[i:end])
+                        i = end
+                        continue
+
+                # macro definitions: copy name, parameters and body verbatim (see DEFINITION_MACROS).
+                if in_text() and name in DEFINITION_MACROS:
+                    end = _definition_end(text, j, name)
+                    if end != -1:
+                        out.append(text[i:end])
+                        i = end
+                        continue
+
                 # running-head macros (\title, \author): copy the whole
                 # invocation verbatim so composed Unicode never reaches
                 # \MakeUppercase.  See PROTECTED_ARG_MACROS.
-                if (not in_math()) and name in PROTECTED_ARG_MACROS:
+                if in_text() and name in PROTECTED_ARG_MACROS:
                     p = j
                     # skip whitespace, then any optional [...] arguments
                     while True:
@@ -442,7 +570,7 @@ def transform(text: str) -> str:
                 continue
 
             # symbol accent (\' \` \^ \" \~ \= \.) — text mode only
-            if (not in_math()) and sym in _SYMBOL_ACCENTS:
+            if in_text() and sym in _SYMBOL_ACCENTS:
                 base, nxt = _read_accent_arg(text, i + 2)
                 if base is not None:
                     out.append(_compose(base, sym))
@@ -479,8 +607,9 @@ def transform(text: str) -> str:
             i += 1
             continue
 
-        # ── math body: copy verbatim (this is where ' stays a prime) ─────
-        if in_math():
+        # ── math body / expl3 code: copy verbatim.  In math this is where
+        #    ' stays a prime; in expl3, ' and ` carry no quote meaning. ─────
+        if not in_text():
             out.append(c)
             i += 1
             continue
