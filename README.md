@@ -148,7 +148,7 @@ See [Bibliography workflow](#bibliography-workflow).
 ## Submitting to arXiv
 
 ```bash
-cd my-paper && make arxiv            # -> my-paper/arxiv/my-paper-arxiv-v1.zip   (make arxiv V=2 for a revision)
+cd my-paper && make arxiv            # -> my-paper/arxiv/my-paper-arxiv-v1.zip   (again: next version; V=2 names one — not -V2)
 ```
 
 The zip holds exactly two files: **one `.tex`** and the **`.bbl`**. The tool inlines, verbatim, every local package (the

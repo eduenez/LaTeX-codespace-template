@@ -41,9 +41,10 @@ all:
 	@$(LATEXMK) $*.tex
 FORCE:
 
-## arxiv: one-file submission bundle <paper>/arxiv/<main>-arxiv-vN.zip (.tex + .bbl; verified); V=<n> sets the version
+## arxiv: one-file submission bundle <paper>/arxiv/<main>-arxiv-vN.zip (.tex + .bbl; verified).
+## `make arxiv` takes the next free version; `make arxiv V=2` names one; add FORCE=1 to overwrite it. (Not -V2: make reads that as an option.)
 arxiv:
-	@python3 $(ROOT)/_scripts/arxiv_bundle.py $(PAPER) $(if $(V),--version $(V)) $(ARXIV_ARGS)
+	@python3 $(ROOT)/_scripts/arxiv_bundle.py $(PAPER) $(if $(V),--version $(V)) $(if $(FORCE),--force) $(ARXIV_ARGS)
 
 ## watch: rebuild the default document whenever a source changes
 watch:
@@ -69,7 +70,7 @@ help:
 	@echo "  make NAME.pdf   build one master                  make watch     rebuild on save"
 	@echo "  make format     typography + semantic wrapping    make check     dry run of format"
 	@echo "  make lint       chktex                            make export    self-contained copy (arXiv)"
-	@echo "  make arxiv      one-file arXiv bundle (zip)       "
+	@echo "  make arxiv      one-file arXiv bundle: next free version, or V=n [FORCE=1]"
 	@echo "  make clean      remove intermediates              make distclean also remove the PDFs"
 	@echo "  make doctor | vendor-check | bib-diff | update-shared   repository-wide chores"
 	@echo "Plain 'latexmk' in this directory does the same as 'make'."

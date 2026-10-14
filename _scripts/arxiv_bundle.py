@@ -212,7 +212,7 @@ def main():
             v += 1
     zpath = os.path.join(outdir, f'{name}-arxiv-v{v}.zip')
     if os.path.exists(zpath) and not a.force:
-        die(f'{os.path.relpath(zpath, ROOT)} exists (bundles are snapshots; use --version N or --force)')
+        die(f'{os.path.relpath(zpath, ROOT)} exists (bundles are snapshots). `make arxiv` alone takes the next free version; `make arxiv V=N` picks one; FORCE=1 (--force) overwrites')
 
     # 1. current build -> .bbl and reference PDF
     cmd = ['latexmk', main_tex] if os.path.exists(os.path.join(pdir, 'latexmkrc')) else ['latexmk', '-r', '../latexmkrc', main_tex]
