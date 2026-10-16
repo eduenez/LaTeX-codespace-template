@@ -95,6 +95,15 @@ def strip_comments(text, where):
 def vendor_commits():
     """file -> short commit from _packages/vendor.lock (lines: file repo commit sha256:...)."""
     d = {}
+    if not os.path.exists(os.path.join(ROOT, '_packages', 'vendor.lock')):
+        # submodule layout (_packages = LaTeX-shared-files): the pinned commit is the provenance of every file
+        r = subprocess.run(['git', '-C', os.path.join(ROOT, '_packages'), 'rev-parse', '--short=7', 'HEAD'], capture_output=True, text=True)
+        if r.returncode == 0:
+            sha = r.stdout.strip()
+            for f in os.listdir(os.path.join(ROOT, '_packages')):
+                if f.endswith('.sty'):
+                    d[f] = ('LaTeX-shared-files', sha)
+        return d
     p = os.path.join(ROOT, '_packages', 'vendor.lock')
     if os.path.exists(p):
         for l in open(p):
@@ -170,7 +179,7 @@ class Flattener:
                 die(f'{where}: \\include is not supported by the bundler: use \\input for the arXiv version')
             if '\\input@path' in line:
                 continue
-            line = line.replace('\\bibliography{../references}', '\\bibliography{references}')
+            line = re.sub(r'\\bibliography\{(\.\./)?([A-Za-z-]+/)?references\}', r'\\bibliography{references}', line)   # also ../math-bibliography/references
             for g in re.findall(r'\\includegraphics(?:\[[^\]]*\])?\{([^}]*)\}', line):
                 self.assets.append(g)
             out.append(line)

@@ -35,11 +35,11 @@ needed=$(cat "$src"/*.sty "$src"/*.tex "$repo"/_packages/*.sty 2>/dev/null \
 for p in $needed; do
   [ -f "$repo/_packages/$p.sty" ] && cp "$repo/_packages/$p.sty" "$out/_packages/"
 done
-cp "$repo/references.bib" "$out/references.bib"
+if [ -f "$repo/references.bib" ]; then cp "$repo/references.bib" "$out/references.bib"; else cp "$repo/math-bibliography/references.bib" "$out/references.bib"; fi   # (submodule layout)
 
 # Rewrite the relative paths in the exported sources.
 for f in "$out"/*.tex; do
-  sed -i.bak -e 's#{\.\./_packages/}{_packages/}#{_packages/}#' -e 's#\\bibliography{\.\./references}#\\bibliography{references}#' "$f"
+  sed -i.bak -e 's#{\.\./_packages/}{_packages/}#{_packages/}#' -e 's#\\bibliography{\(\.\./\)\{0,1\}\(math-bibliography/\)\{0,1\}references}#\\bibliography{references}#' "$f"
   rm -f "$f.bak"
 done
 echo "Exported to ${out#$repo/}/  (build: cd there; pdflatex $paper; bibtex $paper; pdflatex $paper; pdflatex $paper)"
