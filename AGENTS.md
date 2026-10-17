@@ -31,7 +31,10 @@ house conventions, and help the person you are working with adopt those conventi
 - `_templates/{article,monograph}/` — skeletons used by `make new` (placeholder name `PAPER`).
 - `_scripts/` — `new-paper.sh`, `export-paper.sh`, `doctor.sh`, `texwrap.py`, `texfashion.py`, `texsep.py`,
   `setup-hooks.sh`, and `migrate/` (tools for importing and converting external repositories: see `CONVERTING.md`). `latexmkrc` (root, non-hidden) and `Makefile` are the shared entry points.
-- Directories starting with `_` are infrastructure, not papers. There are **no submodules** (students on
+- **Vendored toolkit.** `_scripts/`, `_templates/`, the root files `Makefile`, `latexmkrc`, `latexindent.yaml`, `.chktexrc`,
+  `.editorconfig`, `.gitattributes`, `.vscode/`, `.devcontainer/` and the documents `STYLE.md`, `ONBOARDING.md`, `CONVERTING.md`
+  are pristine copies from `LaTeX-shared-files/toolkit/`, listed with checksums in `_scripts/vendor.lock`
+  (see [Where changes belong](#where-changes-belong)). Directories starting with `_` are infrastructure, not papers. There are **no submodules** (students on
   Windows and Git beginners use this repository); symlinks are not used for LaTeX files.
 
 ## 2. Commands
@@ -45,9 +48,9 @@ same as `make`. At the repository root the same targets exist with `P=<paper>`; 
 | Command | What it does |
 |---|---|
 | `make doctor` | check tools, Git settings and setup; prints how to fix what is missing |
-| `make vendor-check` | verify that `_packages/` files are pristine (SHA-256 in `vendor.lock`) |
+| `make vendor-check` | verify that the vendored `_packages/` files and toolkit files are pristine (SHA-256 in the `vendor.lock` files) |
 | `make bib-diff` | compare `references.bib` with the upstream master: entries to propose upstream, entries edited locally |
-| `make update-shared` | dry run: what changed upstream (shared packages and bibliography); `python3 _scripts/update_shared.py --apply` updates |
+| `make update-shared` | dry run: what changed upstream (shared packages, toolkit, bibliography); `python3 _scripts/update_shared.py --apply` updates |
 | `make new P=<name> TYPE=article\|monograph\|book-single` | create a paper from a template (`monograph`: chapter files via `\include`; `book-single`: the whole book in one file) |
 | `make flat` (in `<paper>/`) | single-file view of a multi-file document, `_build/<main>-flat.tex`, for reading, searching, global replace; edit the real files |
 | `make` (in `<paper>/`) or `make <paper>` (root) | build one paper (PDF next to the source, aux files in `_build/`) |
@@ -65,11 +68,27 @@ Never run `latexmk` at the repository root.
 **Emacs file variables.** Every `.tex` ends with a `%%% Local Variables:` block: `TeX-master: t` in a master, `TeX-master: "<master>"`
 in a child. Keep them when editing; `python3 _scripts/tex_vars.py [--apply] <paper>` adds missing blocks (never alters existing ones). Built PDFs and `_build/` are git-ignored: never commit them.
 
+## Where changes belong
+
+The workflow files listed under *Vendored toolkit* are **not authored in this repository**. Their source of truth is the
+repository `LaTeX-shared-files` (directory `toolkit/`, plus the style packages in `_packages/`); this repository only receives
+copies of them, and so does every repository created from it. Therefore:
+
+* **Never edit a vendored file here** — not for a quick fix, not to make a build pass. `make vendor-check` detects edits, and the
+  next `make update-shared` would silently undo them.
+* **A bug or improvement in a script, template, style file or house document is fixed in `LaTeX-shared-files` first**
+  (tests, commit, push), and only then delivered here with `make update-shared` (dry run) and
+  `python3 _scripts/update_shared.py --apply`. If you are not the maintainer, describe the problem to Eduardo instead of patching
+  around it.
+* What *is* edited here: the papers, `references.bib` (additions; see rule 5), this file, `README.md`, `.gitignore` and `.mailmap`.
+  A per-repository tweak of a managed file is not allowed: if the behaviour must differ, it needs a switch upstream.
+
 ## 3. Rules for editing
 
 1. **Stay in the paper you were asked about.** Shared infrastructure (`latexmkrc`, `Makefile`, `_scripts/`,
-   `.vscode/`, CI, templates) affects every paper: change it only when asked, keep it backward compatible,
-   and verify with `make <paper>` for a few papers (`make build-all FORCE=1` only if asked).
+   `.vscode/`, CI, templates) affects every paper and every repository that vendors it: it is **never changed here** but in
+   `LaTeX-shared-files/toolkit/` (see *Where changes belong*), only when asked, backward compatible, and verified with
+   `make <paper>` for a few papers (`make build-all FORCE=1` only if asked).
 2. **Preamble discipline.** No `\usepackage`, `\newcommand`, `\newtheorem` in the main `.tex`; they go in
    `<paper>.sty` ("Project-specific additions"). Keep the `\makeatletter\def\input@path{{../_packages/}{_packages/}}\makeatother`
    line and `\bibliography{../references}` intact (the export script rewrites them).

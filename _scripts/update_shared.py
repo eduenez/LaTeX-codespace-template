@@ -4,12 +4,16 @@
 Compare the vendored shared files with their upstream (repos named in _packages/vendor.lock) and, with --apply, refresh them:
   * (--add-new) shared di-*.sty / *.bst that exist upstream but are not vendored here yet are copied too;
   * every listed di-*.sty / *.bst in _packages/ is replaced by the upstream copy; vendor.lock gets the new commit and SHA-256;
+  * the TOOLKIT (scripts, templates, shared root files, house documents: LaTeX-shared-files/toolkit/MANIFEST.tsv) is refreshed the
+    same way and pinned in _scripts/vendor.lock — including this very script;
   * references.bib := upstream entries + your local-only entries. If existing entries were EDITED locally the update stops (those
     edits would be lost) unless --force-upstream; fix such entries upstream first (see `make bib-diff`).
 Dry run by default. Needs the network (git clone, depth 1). Afterwards build every paper: upstream may have renamed citation keys
 (see the rekey-*.json files in math-bibliography) or changed a shared macro.
 """
 import sys, os, re, subprocess, tempfile, shutil, hashlib, importlib.util
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import toolkit_lock  # noqa: E402
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 apply_, force, add_new = '--apply' in sys.argv, '--force-upstream' in sys.argv, '--add-new' in sys.argv
@@ -43,6 +47,8 @@ try:
                     new = re.sub(r'^(' + re.escape(f) + r'\s+' + re.escape(repo) + r'\s+)\S+(\s+sha256:\S+)?', r'\g<1>' + head, new, flags=re.M)
             else:
                 print(f'  {f}: up to date')
+        if repo == toolkit_lock.REPO and os.path.exists(os.path.join(d, 'toolkit', 'MANIFEST.tsv')):
+            toolkit_lock.sync(d, head, root, apply_, add_new)
         listed = {f for f, _ in files}
         fresh = sorted(x for x in os.listdir(d) if re.match(r'^di-.*\.(sty|bst)$', x) and x not in listed)
         if fresh:

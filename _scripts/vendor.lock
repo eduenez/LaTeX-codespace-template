@@ -1,0 +1,57 @@
+# vendor.lock — the TOOLKIT files vendored from eduenez/LaTeX-shared-files/toolkit/ (see toolkit/MANIFEST.tsv)
+# Columns:  <path in this repository>  <upstream repo>  <commit>  sha256:<hex of the file>
+# These files are PRISTINE copies: never edit them here. Change them in LaTeX-shared-files first, then run `make update-shared`.
+# (The shared .sty files and the bibliography are pinned separately, in _packages/vendor.lock.)
+
+.chktexrc                                    eduenez/LaTeX-shared-files   fb18b8e  sha256:4a4ca51061440f832a2d5b19e76f982c19c4b4929f41c7b5fa84f08dc53c26fb
+.devcontainer/.dockerignore                  eduenez/LaTeX-shared-files   fb18b8e  sha256:23519e0b006e6e3505412a890fd5e2bc00b4e2cb803ff3028551a958f97ac426
+.devcontainer/Dockerfile                     eduenez/LaTeX-shared-files   fb18b8e  sha256:652e83ed6fcd2cdd139463db37c92645cd7a2f9143affd0f3c8e4d2d00b69b06
+.devcontainer/devcontainer.json              eduenez/LaTeX-shared-files   fb18b8e  sha256:98a61491dac74a371493220458e213d198eabf7dd72d6fc3c833bce257685d89
+.devcontainer/docker-compose.yml             eduenez/LaTeX-shared-files   fb18b8e  sha256:e435f704fd19adc1b9f6470bdf9e5839317eff6d4f96757fb1363bdd479456e9
+.editorconfig                                eduenez/LaTeX-shared-files   fb18b8e  sha256:3e06f11955776960ad23b835c10d87dfc3f7eb57e1c4e4d02dadc4f17f639438
+.gitattributes                               eduenez/LaTeX-shared-files   fb18b8e  sha256:e0ecfc3c3f88445bb9ee9c91e7d9146d3bd6821969191ade066ba29df176a328
+.vscode/extensions.json                      eduenez/LaTeX-shared-files   fb18b8e  sha256:512c705e0f6183c7467edfcb29fc970c6242cdc19fbe74b364c3925069b71755
+.vscode/settings.json                        eduenez/LaTeX-shared-files   fb18b8e  sha256:9eea24f7d808e12ccfe785edbaad8c861094668aa0ee0a1725da2c4c93d24e09
+CONVERTING.md                                eduenez/LaTeX-shared-files   fb18b8e  sha256:692794c1e7c14e4ee234f350a3d0ac226be9840a75b1dab41ec697284cb2b8f0
+Makefile                                     eduenez/LaTeX-shared-files   fb18b8e  sha256:0b73b16fd0d4d0e8f4ed99b86b42eb66b709da19f06904643a997007df6223c5
+ONBOARDING.md                                eduenez/LaTeX-shared-files   fb18b8e  sha256:8aea7d4878fc96ea745b3ff1e7bfd4c71f1133edcfcd9d36543ffbfee007ba0a
+STYLE.md                                     eduenez/LaTeX-shared-files   fb18b8e  sha256:f17a8d46e985ed3a91523c55479e291051cc525198f8bd3724067a6a2d60d483
+_scripts/add-paper-makefiles.sh              eduenez/LaTeX-shared-files   fb18b8e  sha256:c3bb36827e174f0dd1adf8c02011429a25edc054f2fc7a1b20dece6e941bda2d
+_scripts/arxiv_bundle.py                     eduenez/LaTeX-shared-files   fb18b8e  sha256:e6d7d4635f3859efd53c7ef851b3ffcdda1b8d8478d9180e401b6e7755cb1030
+_scripts/bib_diff.py                         eduenez/LaTeX-shared-files   fb18b8e  sha256:8b74af3fe6d97c1a341fdf4e9955f8c070cb9ac8ec4f4f11f4bd2e1800c7ac32
+_scripts/doctor.sh                           eduenez/LaTeX-shared-files   fb18b8e  sha256:faebbc51df7b4c8ebee5608bf8d8ce9dfef040eb68c06a59aad540da4a369891
+_scripts/export-paper.sh                     eduenez/LaTeX-shared-files   fb18b8e  sha256:0ef498b878e5348ca864cd7f1dd247ec16302c9da7d6ebc72221cee578bf91d2
+_scripts/flatten.py                          eduenez/LaTeX-shared-files   fb18b8e  sha256:8f5b031e965cb02fdc6203b8a3cda5a177e1c77fe56fb4e3e0c26ac0fac1d9b8
+_scripts/migrate/idxfilter.py                eduenez/LaTeX-shared-files   fb18b8e  sha256:48dd9139bbb586592d2b1524be72a6ea7fb867a210accbea2c97518eea7cfc1e
+_scripts/migrate/import_repo.py              eduenez/LaTeX-shared-files   fb18b8e  sha256:b407bd848d2b3eeb02b7a8dc5b69a9b87423715a4abb6f0e75f2bd19cb5cde49
+_scripts/migrate/macros.py                   eduenez/LaTeX-shared-files   fb18b8e  sha256:c181a03ba504bb45316e9bd50492931e5c07001ff26e87ad74a47799b4cc499f
+_scripts/migrate/obsolete_notice.py          eduenez/LaTeX-shared-files   fb18b8e  sha256:2887c7544357d535d31b2780839a6afd7221b76b18130dd2fdceadd0c9232074
+_scripts/migrate/pdfdiff.py                  eduenez/LaTeX-shared-files   fb18b8e  sha256:3843d40f9f4b3e9139c121a2cf77aeea67cf8e3cec89f05794b892bca500164e
+_scripts/migrate/propose_names.py            eduenez/LaTeX-shared-files   fb18b8e  sha256:e03f94861ee7f4cb5c2c2277d407f5a2c29a5dd2b097476411ffe170cf7fcf65
+_scripts/migrate/repair_primes.py            eduenez/LaTeX-shared-files   fb18b8e  sha256:32ba681918ca1f0e24a2ec62de1dc76f2eb3cb77ce372df6d3b6772ac53ca30c
+_scripts/migrate/submodules_to_vendored.py   eduenez/LaTeX-shared-files   fb18b8e  sha256:7ad9a9606b0e1036f92d6440437f9630c8d623ba947a62e86caf99c4ba75668f
+_scripts/migrate/texfix.py                   eduenez/LaTeX-shared-files   fb18b8e  sha256:06169a96f85715baeb14b144ff09c662f988be4d082a716e60786be5983702a0
+_scripts/new-paper.sh                        eduenez/LaTeX-shared-files   fb18b8e  sha256:db9ad187454dc6c989fbd6fe2836115a3ba074b7b5e053cb8c9cc41b9fb0a76b
+_scripts/paper.mk                            eduenez/LaTeX-shared-files   fb18b8e  sha256:49061d4292c0ec2a85698f2893c219db237026895d284efd00640ac46bc0c21e
+_scripts/setup-hooks.sh                      eduenez/LaTeX-shared-files   fb18b8e  sha256:106f1a83050001f5f7c1e15573a603ca1ab76b99c4b38d4a2de438feb46c1cea
+_scripts/test_scripts.py                     eduenez/LaTeX-shared-files   fb18b8e  sha256:22f9e0630440ba05f2cd36a52c55fa29abad7e9ed17d6d544806af9deaf0357d
+_scripts/test_texfashion.py                  eduenez/LaTeX-shared-files   fb18b8e  sha256:9587962a83d38296778080ab9569ae0a967bbe91490b223b277f8bf99961efbf
+_scripts/tex_vars.py                         eduenez/LaTeX-shared-files   fb18b8e  sha256:3c7a4f9bc64287c8efa6bffed5c114223cb525d82e82f9f8412dd16bd9871966
+_scripts/texfashion.py                       eduenez/LaTeX-shared-files   fb18b8e  sha256:5c71b7efde7a12c40be2c07960915e71b97977dbe04bbd36ac5783724ee3981d
+_scripts/texsep.py                           eduenez/LaTeX-shared-files   fb18b8e  sha256:4baba1d290f4382d32bb2eb1d9aa76c0a39b6d2467327a54dd0fd48141808d0e
+_scripts/texwrap.py                          eduenez/LaTeX-shared-files   fb18b8e  sha256:392ca9d1e5fd16ec509543594c00d34870bb5529478d99ddc3c1b71b16032f8a
+_scripts/toolkit_lock.py                     eduenez/LaTeX-shared-files   fb18b8e  sha256:a7785d97c9a7bbdf250e49ceec6a4af87cb8b56fccfb4fb6e667900d0b44e820
+_scripts/update_shared.py                    eduenez/LaTeX-shared-files   fb18b8e  sha256:781e15895022fd7e283a654da6917e02b201d75cffb5e25ddd4e1df620a7fb04
+_scripts/vendor_check.py                     eduenez/LaTeX-shared-files   fb18b8e  sha256:a7e5ded60ec845d46af124b8c0b97791ec822270235418b602773a7efd5d7f05
+_templates/article/PAPER.sty                 eduenez/LaTeX-shared-files   fb18b8e  sha256:65daaba661e391e983ca8cb7726ef59c7d04d8fa72d94fe2d3e9f49a315ace5e
+_templates/article/PAPER.tex                 eduenez/LaTeX-shared-files   fb18b8e  sha256:70fed42a916dd8f73fca044094958fa468074172ac09ad4bbb19a574d34eb812
+_templates/book-single/PAPER.sty             eduenez/LaTeX-shared-files   fb18b8e  sha256:3321fb162019a8a110b6085545271b7712312b72c2720940f881513bc2043290
+_templates/book-single/PAPER.tex             eduenez/LaTeX-shared-files   fb18b8e  sha256:7fc9b66f6f2b28446b9b7c24b822f9fa3de2154395daf3e8ee8afa29deae0a0f
+_templates/monograph/PAPER-1-introduction.tex eduenez/LaTeX-shared-files   fb18b8e  sha256:011527867b602345951cd133a14f810cec29773d6324ac4c92079d8cb097c562
+_templates/monograph/PAPER-2-background.tex  eduenez/LaTeX-shared-files   fb18b8e  sha256:adc801c156a898b00bbe3e6fddf4dfae32c5d0179d5ff89b4134fc8acc8bde6e
+_templates/monograph/PAPER-3-main-results.tex eduenez/LaTeX-shared-files   fb18b8e  sha256:b8db2ad434008005c0ffce1403842dc38588e22846d74d2d8e75813ae9f55092
+_templates/monograph/PAPER-4-conclusion.tex  eduenez/LaTeX-shared-files   fb18b8e  sha256:87dfb38c4947f4c2a847f85a7b83412db1b49325ffd0f26533ec7153909ab90f
+_templates/monograph/PAPER.sty               eduenez/LaTeX-shared-files   fb18b8e  sha256:3321fb162019a8a110b6085545271b7712312b72c2720940f881513bc2043290
+_templates/monograph/PAPER.tex               eduenez/LaTeX-shared-files   fb18b8e  sha256:0c6e75eb1e7a30aeadafcc535663f94f67bce8b26da31da7889006137fa10207
+latexindent.yaml                             eduenez/LaTeX-shared-files   fb18b8e  sha256:c3143491a7a2922b70111e75556bb26418a77f9b2e1b8f08bb1b14edda996178
+latexmkrc                                    eduenez/LaTeX-shared-files   fb18b8e  sha256:e06b82ca08c86dc6ab9406c0c5a6cd13bc4904e433cb0fed5057ed6aa8a0d872

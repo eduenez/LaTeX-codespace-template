@@ -57,3 +57,13 @@ if bad:
         print('  -', b)
     sys.exit(1)
 print(f'vendor-check: all {len(listed) - (1 if "references.bib" in listed else 0)} vendored files are pristine')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import toolkit_lock
+tk = toolkit_lock.check(root)
+if tk:
+    print('vendor-check: PROBLEMS with the vendored toolkit:')
+    for b in tk:
+        print('  -', b)
+    sys.exit(1)
+if tk is not None:
+    print(f'vendor-check: all {len(toolkit_lock.read_lock(root))} vendored toolkit files are pristine')
