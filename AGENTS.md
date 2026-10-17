@@ -48,7 +48,8 @@ same as `make`. At the repository root the same targets exist with `P=<paper>`; 
 | `make vendor-check` | verify that `_packages/` files are pristine (SHA-256 in `vendor.lock`) |
 | `make bib-diff` | compare `references.bib` with the upstream master: entries to propose upstream, entries edited locally |
 | `make update-shared` | dry run: what changed upstream (shared packages and bibliography); `python3 _scripts/update_shared.py --apply` updates |
-| `make new P=<name> TYPE=article\|monograph` | create a paper from a template |
+| `make new P=<name> TYPE=article\|monograph\|book-single` | create a paper from a template (`monograph`: chapter files via `\include`; `book-single`: the whole book in one file) |
+| `make flat` (in `<paper>/`) | single-file view of a multi-file document, `_build/<main>-flat.tex`, for reading, searching, global replace; edit the real files |
 | `make` (in `<paper>/`) or `make <paper>` (root) | build one paper (PDF next to the source, aux files in `_build/`) |
 | `make build-all FORCE=1` | build every paper (guarded; rarely needed) |
 | `make format [P=<paper>]` | typography + semantic line wrapping + indentation (idempotent) |

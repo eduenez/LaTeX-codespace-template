@@ -26,7 +26,7 @@ the tools do most of the work for you.
 7. **One bibliography.** Cite with `\cite{Author-Author:YYYY}`. If the work is missing, add an entry to the root
    `references.bib` (never a per-paper `.bib`, never a typed-in reference list); keys never contain a hyphen inside a
    surname (`BenYaacov`, not `Ben-Yaacov`).
-8. **Start a new paper.** `make new P=my-paper TYPE=article` (or `monograph`), then edit `my-paper/my-paper.tex` and
+8. **Start a new paper.** `make new P=my-paper TYPE=article` (or `monograph`: one file per chapter; or `book-single`: a whole book in one file), then edit `my-paper/my-paper.tex` and
    `my-paper/my-paper.sty`. Then work inside `my-paper/`: `make` builds it (`make help` lists the rest), as does plain `latexmk`.
 9. **What not to touch.** `_packages/` (shared, vendored: change it upstream, then re-vendor), other people's papers,
    `latexmkrc`/`Makefile` at the root (they affect everybody).

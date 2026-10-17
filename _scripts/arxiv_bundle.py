@@ -175,8 +175,15 @@ class Flattener:
                 f = os.path.join(self.dir, re.sub(r'(\.tex)?$', '.tex', m.group(2)))
                 out.append(self.flatten(strip_comments(open(f, encoding='utf-8').read(), f), f).rstrip('\n'))
                 continue
-            if re.match(r'^\s*\\include\{', line):
-                die(f'{where}: \\include is not supported by the bundler: use \\input for the arXiv version')
+            m = re.match(r'^(\s*)\\include\{([^}]*)\}\s*$', line)
+            if m:      # \include = \clearpage + the file + \clearpage
+                f = os.path.join(self.dir, re.sub(r'(\.tex)?$', '.tex', m.group(2)))
+                if not os.path.exists(f):
+                    die(f'{where}: {f} not found')
+                out.append('\\clearpage')
+                out.append(self.flatten(strip_comments(open(f, encoding='utf-8').read(), f), f).rstrip('\n'))
+                out.append('\\clearpage')
+                continue
             if '\\input@path' in line:
                 continue
             line = re.sub(r'\\bibliography\{(\.\./)?([A-Za-z-]+/)?references\}', r'\\bibliography{references}', line)   # also ../math-bibliography/references

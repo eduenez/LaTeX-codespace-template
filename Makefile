@@ -9,7 +9,7 @@
 #
 # Targets (P=<paper> restricts the format/lint/clean targets to one paper):
 #   make                 – show help
-#   make new P=name TYPE=article|monograph   – create a new paper from a template
+#   make new P=name TYPE=article|monograph|book-single   – create a new paper from a template
 #   make <paper>         – build one paper (same as `make` inside <paper>/, which has its own Makefile)
 #   make build-all FORCE=1 – build every paper (deliberately guarded: rarely needed, slow)
 #   make export P=name   – self-contained copy in _export/<name>/ (for arXiv etc.)
@@ -73,7 +73,7 @@ help:
 	@echo "    make update-shared   Show (dry run) what changed upstream; add --apply via: python3 _scripts/update_shared.py --apply"
 	@echo ""
 	@echo "  Papers:"
-	@echo "    make new P=name TYPE=article|monograph   Create a new paper from a template"
+	@echo "    make new P=name TYPE=article|monograph|book-single   Create a new paper from a template"
 	@echo "    cd <paper> && make   Build that paper (also: make all, make NAME.pdf, make watch; make help there)"
 	@echo "    make <paper>         Same, from the repository root, e.g. make $(firstword $(PAPERS))"
 	@echo "    make build-all FORCE=1   Build every paper (slow, rarely needed, hence guarded)"
@@ -97,7 +97,7 @@ help:
 
 ## new: Create a paper:  make new P=my-paper TYPE=article|monograph
 new:
-	@test -n "$(P)" || { echo "usage: make new P=<name> TYPE=article|monograph"; exit 2; }
+	@test -n "$(P)" || { echo "usage: make new P=<name> TYPE=article|monograph|book-single"; exit 2; }
 	@bash _scripts/new-paper.sh "$(P)" "$(TYPE)"
 
 ## export: Self-contained copy of one paper in _export/<P>/

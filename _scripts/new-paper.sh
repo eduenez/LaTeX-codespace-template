@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # new-paper.sh — create a new paper directory from a template.
 #
-# Usage:  bash _scripts/new-paper.sh <name> [article|monograph]
-#   (or:  make new P=<name> TYPE=article|monograph)
+# Usage:  bash _scripts/new-paper.sh <name> [article|monograph|book-single]
+#   (or:  make new P=<name> TYPE=article|monograph|book-single)
 #
 # Copies _templates/<type>/ to ./<name>/, renaming PAPER -> <name>, and adds a
 # two-line latexmkrc (plain `latexmk` works inside the new directory) and a one-line Makefile (`make`).
@@ -14,7 +14,7 @@ name="${1:-}"
 type="${2:-article}"
 
 if [ -z "$name" ]; then
-  echo "usage: bash _scripts/new-paper.sh <name> [article|monograph]" >&2
+  echo "usage: bash _scripts/new-paper.sh <name> [article|monograph|book-single]" >&2
   exit 2
 fi
 if ! [[ "$name" =~ ^[A-Za-z0-9][A-Za-z0-9-]*$ ]]; then
@@ -25,7 +25,7 @@ repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 src="$repo/_templates/$type"
 dest="$repo/$name"
 if [ ! -d "$src" ]; then
-  echo "error: unknown type '$type' (expected article or monograph)" >&2
+  echo "error: unknown type '$type' (expected article, monograph or book-single)" >&2
   exit 2
 fi
 if [ -e "$dest" ]; then

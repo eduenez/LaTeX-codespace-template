@@ -60,7 +60,7 @@ Rules of the road:
    clone locally — see [Local setup](#local-setup-macos-and-ubuntu).
 3. Create a paper (in the Codespace terminal, macOS/Linux, or Git Bash):
    ```bash
-   make new P=my-paper TYPE=article        # or TYPE=monograph
+   make new P=my-paper TYPE=article        # or TYPE=monograph (chapter files) or TYPE=book-single (one-file book)
    ```
    *Without `make`/bash (e.g. plain Windows):* copy the folder `_templates/article/`
    to a new folder `my-paper/` at the repo root, then rename every file
@@ -158,7 +158,7 @@ removes the repository plumbing (`\input@path`, `../references`) and all comment
 directory with plain `pdflatex` and checks that the pages and text equal the normal build. The zip is reproducible
 (fixed timestamps) and never overwritten. After you have actually submitted: `git add` the zip, commit, and tag
 `arxiv-<paper>-v1`; the tag is then the permanent record of what arXiv received. Figures are added to the zip as files;
-`\include` is not supported (use `\input`).
+`\input` and `\include` are inlined.
 
 ## Setup check and onboarding
 
@@ -359,6 +359,16 @@ the paper's directory (the monograph template ships four).
 1. Create `my-book/my-book-5-new-topic.tex`.
 2. Add `\include{my-book-5-new-topic}` to `my-book/my-book.tex`.
 3. Optionally restrict compilation with `\includeonly{...}`.
+
+## One file or many? (books)
+
+`TYPE=monograph` splits a book into chapter files (`\include`); `TYPE=book-single` keeps the whole book in one file, chapters
+separated by the `%#` banners. For a single author on a modern machine a one-file book is often simpler: a whole-book
+find-and-replace is one operation, error lines point into one file, and a 470-page book builds in about a minute anyway. Split
+when several people edit concurrently, when chapters are reused elsewhere, or when your editor struggles with the file size.
+Either way, `make flat` (in the paper's directory) writes a single-file view `_build/<main>-flat.tex` of a multi-file document,
+for reading, searching and global replace; in Emacs, RefTeX's `reftex-search-document` and `reftex-query-replace-document`
+work across all files of a master. To split a one-file book later, move a chapter to `<paper>-N-<topic>.tex` and `\input` it.
 
 ## License
 

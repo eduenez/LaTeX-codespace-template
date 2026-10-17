@@ -23,7 +23,7 @@ LATEXMK := latexmk $(if $(wildcard latexmkrc),,-r ../latexmkrc)
 
 .DEFAULT_GOAL := pdf
 .PHONY: pdf PDF compile article all watch clean distclean help FORCE \
-        arxiv format reflow fashion wrap indent sep check lint export doctor vendor-check bib-diff update-shared install-hooks
+        arxiv flat format reflow fashion wrap indent sep check lint export doctor vendor-check bib-diff update-shared install-hooks
 
 ## pdf: build the default document of this directory (synonyms: PDF, compile, article)
 pdf PDF compile article:
@@ -45,6 +45,11 @@ FORCE:
 ## `make arxiv` takes the next free version; `make arxiv V=2` names one; add FORCE=1 to overwrite it. (Not -V2: make reads that as an option.)
 arxiv:
 	@python3 $(ROOT)/_scripts/arxiv_bundle.py $(PAPER) $(if $(V),--version $(V)) $(if $(FORCE),--force) $(ARXIV_ARGS)
+
+## flat: single-file view of the whole document (all \input/\include inlined) in _build/<main>-flat.tex, for reading,
+## searching and global replace; see _scripts/flatten.py
+flat:
+	@python3 $(ROOT)/_scripts/flatten.py $(PAPER) $(if $(MAIN),--main $(MAIN))
 
 ## watch: rebuild the default document whenever a source changes
 watch:
@@ -70,6 +75,7 @@ help:
 	@echo "  make NAME.pdf   build one master                  make watch     rebuild on save"
 	@echo "  make format     typography + semantic wrapping    make check     dry run of format"
 	@echo "  make lint       chktex                            make export    self-contained copy (arXiv)"
+	@echo "  make flat       single-file view of a multi-file document (_build/NAME-flat.tex)"
 	@echo "  make arxiv      one-file arXiv bundle: next free version, or V=n [FORCE=1]"
 	@echo "  make clean      remove intermediates              make distclean also remove the PDFs"
 	@echo "  make doctor | vendor-check | bib-diff | update-shared   repository-wide chores"
