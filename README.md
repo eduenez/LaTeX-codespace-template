@@ -13,7 +13,7 @@ plus a fully configured Codespace for cloud editing in VS Code.
   `\usepackage{<paper>}`, and semantic metadata; every `\usepackage`, macro, and
   `\newtheorem` lives in the paper's style file `<paper>.sty`, which loads the
   shared packages **vendored** in `_packages/`.
-- **Bibliography:** BibTeX, style `alpha`, from **one shared** root `references.bib`.
+- **Bibliography:** BibTeX, style `amsalpha`, from **one shared** root `references.bib`.
 - **No submodules, no symlinks needed:** everything builds from a plain clone (including
   on Windows); the only symlink, `CLAUDE.md` → `AGENTS.md`, is optional. Shared files are reached by relative path (`../`).
 - **Checks:** advisory — they guide, they don't block (see below).
@@ -142,7 +142,7 @@ See [Bibliography workflow](#bibliography-workflow).
    entry when the work is already there; keys are `Author-Author:YYYY`).
    If the references were typed inline in a `thebibliography`, convert each
    `\bibitem` into a BibTeX entry and replace the block with
-   `\bibliographystyle{alpha}\bibliography{../references}`.
+   `\bibliographystyle{amsalpha}\bibliography{../references}`.
 4. Build, fix undefined citations, then retire the old repository.
 
 ## Submitting to arXiv
