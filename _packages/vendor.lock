@@ -22,7 +22,7 @@ di-structures.sty      eduenez/LaTeX-shared-files   dfca875  sha256:70286b5c5d3f
 di-ramsey.sty          eduenez/LaTeX-shared-files   af98e4f  sha256:4ddd16c9fb8ef92708ed28fa89ecb5f55b1f89c1e702fa3fee2c00dd8520f0ba
 di-random.sty          eduenez/LaTeX-shared-files   af98e4f  sha256:8b78551bf11e8e8e5bf49006a977e06e2b0d589f3429b661d9d4eb2c697e7973
 di-exercises.sty       eduenez/LaTeX-shared-files   48dd942  sha256:f79ada773214ea59ac113fbc41de7665e5b3cd21119e21813bc508d7206be0ec
-references.bib         eduenez/math-bibliography   8925300
+references.bib         eduenez/math-bibliography   01d0631
 di-alphabets.sty       eduenez/LaTeX-shared-files   dfca875  sha256:cf8387ae29b24bbbaed79865aff508435080e13b06eb6075fd0a8b4e38f6570d
 di-amsalpha.bst        eduenez/LaTeX-shared-files   dfca875  sha256:07d7e3cd1adffc66ade087025628f2bae9e9080e4a0a690c888e3de0987216f1
 di-base.sty            eduenez/LaTeX-shared-files   dfca875  sha256:9de15dde55da21b354d53a6107c812a0788e47583e7c17337faf8af9deb041e2
